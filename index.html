@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacman Game</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            color: #fff;
+        }
+        #header {
+            display: flex;
+            justify-content: space-between;
+            width: 560px;
+            padding: 10px 0;
+            font-size: 20px;
+        }
+        #score { color: #fff; }
+        #lives { color: #ff0; }
+        canvas {
+            border: 2px solid #2121de;
+            display: block;
+        }
+        #message {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #ff0;
+            height: 25px;
+        }
+        #controls {
+            margin-top: 10px;
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <div id="score">Score: 0</div>
+        <div id="lives">Lives: 3</div>
+    </div>
+    <canvas id="game" width="560" height="620"></canvas>
+    <div id="message">Press any arrow key to start</div>
+    <div id="controls">Arrow Keys / WASD to move | R to restart</div>
+    <script src="pacman.js"></script>
+</body>
+</html>
