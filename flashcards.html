@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>כרטיסיות מילים - Flashcards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: ltr;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px 10px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px 20px;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 25px;
+            background: transparent;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .controls button:hover,
+        .controls button.active {
+            background: white;
+            color: #764ba2;
+        }
+
+        .stats {
+            text-align: center;
+            color: white;
+            padding: 5px;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .card-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 340px;
+            height: 220px;
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .card-front {
+            background: white;
+        }
+
+        .card-front .word {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .card-front .part-label {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 10px;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transform: rotateY(180deg);
+        }
+
+        .card-back .translation {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        .card-back .phonetic {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.85);
+            margin-top: 8px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 15px 20px;
+        }
+
+        .nav-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.1);
+        }
+
+        .counter {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .shuffle-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: block;
+            margin: 0 auto 10px;
+            font-weight: 600;
+        }
+
+        .shuffle-btn:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .grid-view {
+            display: none;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .grid-view.visible {
+            display: flex;
+        }
+
+        .grid-card {
+            width: 140px;
+            height: 90px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .grid-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .grid-card .grid-word {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .grid-card .grid-translation {
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .grid-card.revealed .grid-translation {
+            display: block;
+            color: #f5576c;
+        }
+
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .view-toggle button {
+            padding: 8px 18px;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 20px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .view-toggle button.active {
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+        }
+
+        .flashcard-view {
+            display: block;
+        }
+
+        .flashcard-view.hidden {
+            display: none;
+        }
+
+        @media (max-width: 400px) {
+            .card {
+                width: 290px;
+                height: 190px;
+            }
+            .card-front .word {
+                font-size: 2.2rem;
+            }
+            .header h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Flashcards - כרטיסיות</h1>
+    <p>לחץ על הכרטיסייה כדי לראות את התרגום</p>
+</div>
+
+<div class="controls" id="unitControls">
+    <button class="active" onclick="filterUnit('all')">All</button>
+    <button onclick="filterUnit('1')">Unit 1</button>
+    <button onclick="filterUnit('2')">Unit 2</button>
+</div>
+
+<div class="controls" id="partControls"></div>
+
+<div class="view-toggle">
+    <button class="active" onclick="setView('flashcard')">כרטיסייה</button>
+    <button onclick="setView('grid')">רשת</button>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<div class="flashcard-view" id="flashcardView">
+    <div class="card-container">
+        <div class="card" id="card" onclick="flipCard()">
+            <div class="card-face card-front">
+                <div class="word" id="frontWord"></div>
+                <div class="part-label" id="partLabel"></div>
+            </div>
+            <div class="card-face card-back">
+                <div class="translation" id="backTranslation"></div>
+                <div class="phonetic" id="backPhonetic"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="prevCard()">&#9664;</button>
+        <div class="counter" id="counter"></div>
+        <button class="nav-btn" onclick="nextCard()">&#9654;</button>
+    </div>
+
+    <button class="shuffle-btn" onclick="shuffleCards()">&#x1f500; Shuffle / ערבב</button>
+</div>
+
+<div class="grid-view" id="gridView"></div>
+
+<script>
+const allWords = [
+    // Unit 1 - Part 4
+    { word: "dad", translation: "אבא", phonetic: "דד", unit: "1", part: "4" },
+    { word: "desk", translation: "שולחן כתיבה", phonetic: "דסק", unit: "1", part: "4" },
+    { word: "duck", translation: "ברווז", phonetic: "דאק", unit: "1", part: "4" },
+    { word: "help", translation: "עזרה", phonetic: "הלפ", unit: "1", part: "4" },
+    { word: "sad", translation: "עצוב", phonetic: "סד", unit: "1", part: "4" },
+    { word: "bad", translation: "רע", phonetic: "בד", unit: "1", part: "4" },
+
+    // Unit 1 - Part 5
+    { word: "grandma", translation: "סבתא", phonetic: "גרנדמא", unit: "1", part: "5" },
+    { word: "grandpa", translation: "סבא", phonetic: "גרנדפא", unit: "1", part: "5" },
+    { word: "gift", translation: "מתנה", phonetic: "גיפט", unit: "1", part: "5" },
+    { word: "gray", translation: "אפור", phonetic: "גריי", unit: "1", part: "5" },
+    { word: "door", translation: "דלת", phonetic: "דור", unit: "1", part: "5" },
+    { word: "house", translation: "בית", phonetic: "האוס", unit: "1", part: "5" },
+
+    // Unit 2 - Part 1
+    { word: "elephant", translation: "פיל", phonetic: "אלפנט", unit: "2", part: "1" },
+    { word: "egg", translation: "ביצה", phonetic: "אג", unit: "2", part: "1" },
+    { word: "eraser", translation: "מחק", phonetic: "אריסר", unit: "2", part: "1" },
+    { word: "school", translation: "בית ספר", phonetic: "סקול", unit: "2", part: "1" },
+    { word: "pencil", translation: "עיפרון", phonetic: "פנסיל", unit: "2", part: "1" },
+    { word: "bed", translation: "מיטה", phonetic: "בד", unit: "2", part: "1" },
+    { word: "table", translation: "שולחן", phonetic: "טייבל", unit: "2", part: "1" },
+
+    // Unit 2 - Part 2
+    { word: "test", translation: "מבחן", phonetic: "טסט", unit: "2", part: "2" },
+    { word: "teacher", translation: "מורה", phonetic: "טיצ׳ר", unit: "2", part: "2" },
+    { word: "pen", translation: "עט", phonetic: "פן", unit: "2", part: "2" },
+    { word: "pencil case", translation: "קלמר", phonetic: "פנסיל קייס", unit: "2", part: "2" },
+    { word: "hat", translation: "כובע", phonetic: "הט", unit: "2", part: "2" },
+    { word: "add", translation: "להוסיף", phonetic: "אד", unit: "2", part: "2" },
+    { word: "plus", translation: "ועוד / פלוס", phonetic: "פלאס", unit: "2", part: "2" },
+
+    // Unit 2 - Part 3
+    { word: "in", translation: "בתוך", phonetic: "אין", unit: "2", part: "3" },
+    { word: "on", translation: "על", phonetic: "און", unit: "2", part: "3" },
+    { word: "pupil", translation: "תלמיד", phonetic: "פיופיל", unit: "2", part: "3" },
+    { word: "picture", translation: "תמונה", phonetic: "פיקצ׳ר", unit: "2", part: "3" },
+    { word: "chair", translation: "כיסא", phonetic: "צ׳ר", unit: "2", part: "3" },
+    { word: "lost", translation: "אבוד", phonetic: "לוסט", unit: "2", part: "3" },
+    { word: "ask", translation: "לשאול", phonetic: "אסק", unit: "2", part: "3" },
+
+    // Unit 2 - Part 4
+    { word: "play", translation: "לשחק", phonetic: "פליי", unit: "2", part: "4" },
+    { word: "sing", translation: "לשיר", phonetic: "סינג", unit: "2", part: "4" },
+    { word: "run", translation: "לרוץ", phonetic: "ראן", unit: "2", part: "4" },
+    { word: "rest", translation: "לנוח", phonetic: "רסט", unit: "2", part: "4" },
+    { word: "hen", translation: "תרנגולת", phonetic: "הן", unit: "2", part: "4" },
+    { word: "rabbit", translation: "ארנב", phonetic: "רביט", unit: "2", part: "4" },
+    { word: "best", translation: "הכי טוב", phonetic: "בסט", unit: "2", part: "4" },
+
+    // Unit 2 - Part 5
+    { word: "hand", translation: "יד", phonetic: "הנד", unit: "2", part: "5" },
+    { word: "horse", translation: "סוס", phonetic: "הורס", unit: "2", part: "5" },
+    { word: "happy", translation: "שמח", phonetic: "הפי", unit: "2", part: "5" },
+    { word: "good", translation: "טוב", phonetic: "גוד", unit: "2", part: "5" },
+    { word: "tall", translation: "גבוה", phonetic: "טול", unit: "2", part: "5" },
+    { word: "fast", translation: "מהיר", phonetic: "פסט", unit: "2", part: "5" },
+    { word: "ball", translation: "כדור", phonetic: "בול", unit: "2", part: "5" },
+];
+
+let filteredWords = [...allWords];
+let currentIndex = 0;
+let currentUnit = 'all';
+let currentView = 'flashcard';
+
+function filterUnit(unit) {
+    currentUnit = unit;
+    document.querySelectorAll('#unitControls button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (unit === 'all') {
+        filteredWords = [...allWords];
+    } else {
+        filteredWords = allWords.filter(w => w.unit === unit);
+    }
+
+    buildPartControls(unit);
+    currentIndex = 0;
+    updateCard();
+    updateGrid();
+}
+
+function filterPart(unit, part) {
+    document.querySelectorAll('#partControls button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if (part === 'all') {
+        filteredWords = unit === 'all' ? [...allWords] : allWords.filter(w => w.unit === unit);
+    } else {
+        filteredWords = allWords.filter(w => w.unit === unit && w.part === part);
+    }
+
+    currentIndex = 0;
+    updateCard();
+    updateGrid();
+}
+
+function buildPartControls(unit) {
+    const container = document.getElementById('partControls');
+    container.innerHTML = '';
+
+    if (unit === 'all') return;
+
+    const parts = [...new Set(allWords.filter(w => w.unit === unit).map(w => w.part))].sort();
+
+    const allBtn = document.createElement('button');
+    allBtn.textContent = 'All Parts';
+    allBtn.classList.add('active');
+    allBtn.onclick = () => filterPart(unit, 'all');
+    container.appendChild(allBtn);
+
+    parts.forEach(p => {
+        const btn = document.createElement('button');
+        btn.textContent = `Part ${p}`;
+        btn.onclick = () => filterPart(unit, p);
+        container.appendChild(btn);
+    });
+}
+
+function flipCard() {
+    document.getElementById('card').classList.toggle('flipped');
+}
+
+function nextCard() {
+    if (filteredWords.length === 0) return;
+    document.getElementById('card').classList.remove('flipped');
+    setTimeout(() => {
+        currentIndex = (currentIndex + 1) % filteredWords.length;
+        updateCard();
+    }, 150);
+}
+
+function prevCard() {
+    if (filteredWords.length === 0) return;
+    document.getElementById('card').classList.remove('flipped');
+    setTimeout(() => {
+        currentIndex = (currentIndex - 1 + filteredWords.length) % filteredWords.length;
+        updateCard();
+    }, 150);
+}
+
+function shuffleCards() {
+    for (let i = filteredWords.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filteredWords[i], filteredWords[j]] = [filteredWords[j], filteredWords[i]];
+    }
+    currentIndex = 0;
+    document.getElementById('card').classList.remove('flipped');
+    updateCard();
+    updateGrid();
+}
+
+function updateCard() {
+    if (filteredWords.length === 0) return;
+    const w = filteredWords[currentIndex];
+    document.getElementById('frontWord').textContent = w.word;
+    document.getElementById('partLabel').textContent = `Unit ${w.unit} - Part ${w.part}`;
+    document.getElementById('backTranslation').textContent = w.translation;
+    document.getElementById('backPhonetic').textContent = w.phonetic;
+    document.getElementById('counter').textContent = `${currentIndex + 1} / ${filteredWords.length}`;
+    document.getElementById('stats').textContent = `${filteredWords.length} words`;
+}
+
+function updateGrid() {
+    const grid = document.getElementById('gridView');
+    grid.innerHTML = '';
+    filteredWords.forEach((w, i) => {
+        const card = document.createElement('div');
+        card.className = 'grid-card';
+        card.innerHTML = `<div class="grid-word">${w.word}</div><div class="grid-translation">${w.translation}</div>`;
+        card.onclick = () => card.classList.toggle('revealed');
+        grid.appendChild(card);
+    });
+}
+
+function setView(view) {
+    currentView = view;
+    document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+
+    const fv = document.getElementById('flashcardView');
+    const gv = document.getElementById('gridView');
+
+    if (view === 'flashcard') {
+        fv.classList.remove('hidden');
+        gv.classList.remove('visible');
+    } else {
+        fv.classList.add('hidden');
+        gv.classList.add('visible');
+    }
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextCard();
+    else if (e.key === 'ArrowLeft') prevCard();
+    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+});
+
+// Touch swipe support
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
+document.addEventListener('touchend', (e) => {
+    const diff = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(diff) > 50) {
+        if (diff > 0) prevCard();
+        else nextCard();
+    }
+});
+
+// Initialize
+updateCard();
+updateGrid();
+</script>
+
+</body>
+</html>
