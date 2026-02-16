@@ -159,43 +159,23 @@
         @keyframes correctPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
         @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
 
-        /* Scramble mode */
-        .scramble-display {
+        /* Image match mode */
+        .imgmatch-prompt {
             text-align:center; padding:30px; background:var(--card);
             border-radius:20px; margin-bottom:20px;
         }
-        .scramble-display .hebrew { font-size:1.8em; font-weight:700; color:var(--yellow); margin-bottom:15px; }
-        .scramble-letters {
-            display:flex; justify-content:center; gap:10px; flex-wrap:wrap;
-            direction:ltr; margin-bottom:20px;
+        .imgmatch-prompt .label { font-size:0.9em; color:#889; margin-bottom:12px; }
+        .imgmatch-emoji { font-size:6em; margin:10px 0; }
+        .imgmatch-options { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+        .imgmatch-option {
+            background:var(--card); border:2px solid rgba(255,255,255,0.15);
+            border-radius:16px; padding:20px; font-size:1.4em; font-weight:700;
+            color:#fff; cursor:pointer; font-family:'Rubik',sans-serif;
+            transition:all 0.2s; text-align:center; direction:ltr;
         }
-        .scramble-letter {
-            width:50px; height:55px; background:linear-gradient(135deg,var(--purple),var(--blue));
-            border:none; border-radius:12px; font-size:1.5em; font-weight:900; color:#fff;
-            cursor:pointer; font-family:'Rubik',sans-serif; transition:all 0.2s; text-transform:uppercase;
-        }
-        .scramble-letter:hover { transform:scale(1.1); }
-        .scramble-letter.used { opacity:0.3; transform:scale(0.9); pointer-events:none; }
-        .scramble-letter.space-letter {
-            background:transparent; border:2px dashed rgba(255,255,255,0.2);
-            pointer-events:none; width:25px; font-size:0.8em; color:#889;
-        }
-        .answer-slots { display:flex; justify-content:center; gap:8px; direction:ltr; margin-bottom:15px; flex-wrap:wrap; }
-        .answer-slot {
-            width:50px; height:55px; background:rgba(255,255,255,0.08);
-            border:2px dashed rgba(255,255,255,0.2); border-radius:12px;
-            display:flex; align-items:center; justify-content:center;
-            font-size:1.5em; font-weight:900; text-transform:uppercase; cursor:pointer; transition:all 0.2s;
-        }
-        .answer-slot.filled { background:rgba(77,255,136,0.15); border-color:var(--green); color:var(--green); }
-        .answer-slot.space-slot {
-            width:25px; background:transparent; border:none; pointer-events:none;
-            color:#556; font-size:1em;
-        }
-        .scramble-hint-btn {
-            background:var(--orange); border:none; padding:8px 20px; border-radius:10px;
-            color:#fff; font-family:inherit; font-size:0.9em; cursor:pointer; font-weight:600;
-        }
+        .imgmatch-option:hover { border-color:var(--blue); background:rgba(77,159,255,0.1); }
+        .imgmatch-option.correct { border-color:var(--green); background:rgba(77,255,136,0.2); animation:correctPulse 0.5s ease; }
+        .imgmatch-option.wrong { border-color:#ff4444; background:rgba(255,68,68,0.2); animation:shake 0.4s ease; }
 
         /* Catcher game */
         .catcher-area {
@@ -339,7 +319,7 @@
             .quiz-prompt .hebrew-word { font-size:2em; }
             .memory-grid { grid-template-columns:repeat(3,1fr); }
             .stats-bar { gap:15px; flex-wrap:wrap; }
-            .scramble-letter, .answer-slot { width:40px; height:45px; font-size:1.2em; }
+            .imgmatch-options { grid-template-columns:1fr; }
             .catcher-area { height:350px; }
             .stages-grid { grid-template-columns:repeat(2,1fr); }
         }
@@ -401,21 +381,19 @@
         <div class="quiz-options" id="quizOptions"></div>
     </div>
 
-    <!-- SCRAMBLE SCREEN -->
-    <div class="screen" id="scrambleScreen">
+    <!-- IMAGE MATCH SCREEN -->
+    <div class="screen" id="imgmatchScreen">
         <button class="back-btn" onclick="goToStages()">&#8594; חזרה לשלבים</button>
         <div class="stage-info-bar">
-            <span id="scrambleStageLabel"></span>
-            <span class="info-right" id="scrambleScoreLabel"></span>
+            <span id="imgmatchStageLabel"></span>
+            <span class="info-right" id="imgmatchScoreLabel"></span>
         </div>
-        <div class="progress-bar"><div class="progress-fill" id="scrambleProgress"></div></div>
-        <div class="scramble-display">
-            <div class="label" style="color:#889;margin-bottom:8px;">סדר את האותיות:</div>
-            <div class="hebrew" id="scrambleHebrew"></div>
-            <div class="answer-slots" id="answerSlots"></div>
-            <div class="scramble-letters" id="scrambleLetters"></div>
-            <button class="scramble-hint-btn" onclick="scrambleHint()">רמז</button>
+        <div class="progress-bar"><div class="progress-fill" id="imgmatchProgress"></div></div>
+        <div class="imgmatch-prompt">
+            <div class="label">איזו מילה מתאימה לתמונה?</div>
+            <div class="imgmatch-emoji" id="imgmatchEmoji"></div>
         </div>
+        <div class="imgmatch-options" id="imgmatchOptions"></div>
     </div>
 
     <!-- CATCHER SCREEN -->
@@ -532,7 +510,7 @@ const WORDS = [
 // ========== METHODS & STAGES CONFIG ==========
 const METHODS = [
     { id: 'quiz', name: 'חידון מילים', icon: '\u{1F3AF}', desc: 'בחר את המילה הנכונה באנגלית', color: 'var(--pink)' },
-    { id: 'scramble', name: 'אותיות מבולבלות', icon: '\u{1F524}', desc: 'סדר את האותיות למילה הנכונה', color: 'var(--blue)' },
+    { id: 'imgmatch', name: 'התאם תמונה למילה', icon: '\u{1F5BC}', desc: 'בחר את המילה שמתאימה לתמונה', color: 'var(--blue)' },
     { id: 'catcher', name: 'תפוס מילה!', icon: '\u{1F9FA}', desc: 'תפוס את המילה הנכונה שנופלת', color: 'var(--green)' },
     { id: 'memory', name: 'זיכרון', icon: '\u{1F9E0}', desc: 'התאם מילים באנגלית ובעברית', color: 'var(--purple)' }
 ];
@@ -556,7 +534,7 @@ function initProgress() {
     const p = {};
     METHODS.forEach((m, mi) => {
         p[m.id] = {
-            unlocked: mi === 0,
+            unlocked: true,
             stages: []
         };
         for (let s = 0; s < NUM_STAGES; s++) {
@@ -574,7 +552,7 @@ function loadState() {
             // Make sure structure matches (in case words changed)
             METHODS.forEach((m, mi) => {
                 if (!progress[m.id]) {
-                    progress[m.id] = { unlocked: mi === 0, stages: [] };
+                    progress[m.id] = { unlocked: true, stages: [] };
                 }
                 while (progress[m.id].stages.length < NUM_STAGES) {
                     progress[m.id].stages.push({ completed: false, bestScore: 0 });
@@ -812,7 +790,7 @@ function renderStages() {
 function startMethod(methodId) {
     switch(methodId) {
         case 'quiz': startQuiz(); break;
-        case 'scramble': startScramble(); break;
+        case 'imgmatch': startImgMatch(); break;
         case 'catcher': startCatcher(); break;
         case 'memory': startMemory(); break;
     }
@@ -832,15 +810,6 @@ function finishStage() {
 
     if (passed) {
         mp.stages[currentStageIdx].completed = true;
-
-        // Check if all stages in this method are done
-        if (isMethodComplete(m.id)) {
-            // Unlock next method
-            const nextMi = currentMethodIdx + 1;
-            if (nextMi < METHODS.length) {
-                progress[METHODS[nextMi].id].unlocked = true;
-            }
-        }
     }
 
     saveState();
@@ -864,11 +833,8 @@ function showResults(pct, passed) {
 
     if (passed) {
         const methodDone = isMethodComplete(m.id);
-        if (methodDone && currentMethodIdx < METHODS.length - 1) {
-            document.getElementById('resultsMsg').textContent =
-                'סיימת את כל השלבים ב' + m.name + '! נפתח: ' + METHODS[currentMethodIdx + 1].name;
-        } else if (methodDone) {
-            document.getElementById('resultsMsg').textContent = 'סיימת את כל המשחק! מדהים!';
+        if (methodDone) {
+            document.getElementById('resultsMsg').textContent = 'סיימת את כל השלבים ב' + m.name + '! כל הכבוד!';
         } else {
             document.getElementById('resultsMsg').textContent = 'עברת את השלב! השלב הבא נפתח.';
         }
@@ -1023,185 +989,81 @@ function quizAnswer(btn, correct, wordEn) {
     }, 1200);
 }
 
-// ========== SCRAMBLE MODE ==========
-let scrambleWords, scrambleIndex, scrambleAnswer, scrambleCurrent, scrambleSpaceIndices;
+// ========== IMAGE MATCH MODE ==========
+let imgmatchWords, imgmatchIndex, imgmatchLocked;
 
-function startScramble() {
-    showScreen('scrambleScreen');
-    scrambleWords = shuffle(getCurrentStageWords());
-    scrambleIndex = 0;
-    document.getElementById('scrambleStageLabel').textContent =
+function startImgMatch() {
+    showScreen('imgmatchScreen');
+    imgmatchWords = shuffle(getCurrentStageWords());
+    imgmatchIndex = 0;
+    document.getElementById('imgmatchStageLabel').textContent =
         METHODS[currentMethodIdx].name + ' - שלב ' + (currentStageIdx + 1);
-    updateScrambleScore();
-    showScrambleWord();
+    updateImgMatchScore();
+    showImgMatchQuestion();
 }
 
-function updateScrambleScore() {
-    document.getElementById('scrambleScoreLabel').textContent =
+function updateImgMatchScore() {
+    document.getElementById('imgmatchScoreLabel').textContent =
         stageCorrect + '/' + stageTotal;
 }
 
-function showScrambleWord() {
-    if (scrambleIndex >= scrambleWords.length) {
+function showImgMatchQuestion() {
+    if (imgmatchIndex >= imgmatchWords.length) {
         finishStage();
         return;
     }
-    const word = scrambleWords[scrambleIndex];
-    scrambleAnswer = word.en.toUpperCase();
-    scrambleCurrent = [];
-    scrambleSpaceIndices = [];
+    imgmatchLocked = false;
+    const word = imgmatchWords[imgmatchIndex];
+    document.getElementById('imgmatchEmoji').textContent = word.emoji;
+    document.getElementById('imgmatchProgress').style.width =
+        ((imgmatchIndex / imgmatchWords.length) * 100) + '%';
 
-    // Find space positions
-    for (let i = 0; i < scrambleAnswer.length; i++) {
-        if (scrambleAnswer[i] === ' ') scrambleSpaceIndices.push(i);
-    }
+    // Generate options: correct + 3 wrong
+    let options = [word];
+    const others = WORDS.filter(w => w.en !== word.en);
+    const wrongOnes = shuffle(others).slice(0, 3);
+    options = shuffle([...options, ...wrongOnes]);
 
-    document.getElementById('scrambleHebrew').textContent = word.he + ' ' + word.emoji;
-    document.getElementById('scrambleProgress').style.width =
-        ((scrambleIndex / scrambleWords.length) * 100) + '%';
-
-    // Create answer slots
-    const slotsContainer = document.getElementById('answerSlots');
-    slotsContainer.innerHTML = '';
-    for (let i = 0; i < scrambleAnswer.length; i++) {
-        const slot = document.createElement('div');
-        if (scrambleAnswer[i] === ' ') {
-            slot.className = 'answer-slot space-slot';
-            slot.textContent = ' ';
-        } else {
-            slot.className = 'answer-slot';
-            slot.dataset.index = i;
-            slot.onclick = (function(idx) { return function() { removeFromSlot(idx); }; })(i);
-        }
-        slotsContainer.appendChild(slot);
-    }
-
-    // Create scrambled letters (only non-space characters)
-    const lettersOnly = scrambleAnswer.split('').filter(c => c !== ' ');
-    const shuffledLetters = shuffle(lettersOnly);
-    const lettersContainer = document.getElementById('scrambleLetters');
-    lettersContainer.innerHTML = '';
-    shuffledLetters.forEach(function(letter, i) {
+    const container = document.getElementById('imgmatchOptions');
+    container.innerHTML = '';
+    options.forEach(function(opt) {
         const btn = document.createElement('button');
-        btn.className = 'scramble-letter';
-        btn.textContent = letter;
-        btn.dataset.idx = i;
-        btn.onclick = function() { addLetter(btn, letter, i); };
-        lettersContainer.appendChild(btn);
+        btn.className = 'imgmatch-option';
+        btn.textContent = opt.en;
+        btn.onclick = function() { imgmatchAnswer(btn, opt.en === word.en, word.en); };
+        container.appendChild(btn);
     });
 }
 
-function getNextEmptySlotIdx() {
-    // Find the next empty non-space slot index in the answer
-    for (let i = 0; i < scrambleAnswer.length; i++) {
-        if (scrambleAnswer[i] === ' ') continue;
-        const slot = document.querySelectorAll('.answer-slot')[i];
-        if (!slot.classList.contains('filled') && !slot.classList.contains('space-slot')) return i;
+function imgmatchAnswer(btn, correct, wordEn) {
+    if (imgmatchLocked) return;
+    imgmatchLocked = true;
+    stageTotal++;
+
+    if (correct) {
+        btn.classList.add('correct');
+        showFloatingFeedback('\u{2B50}');
+        playCorrectSound();
+        streak++;
+        stageCorrect++;
+        addStars(streak >= 3 ? 3 : 1);
+        markWordLearned(wordEn);
+    } else {
+        btn.classList.add('wrong');
+        playWrongSound();
+        showFloatingFeedback('\u{274C}');
+        streak = 0;
+        document.querySelectorAll('.imgmatch-option').forEach(function(b) {
+            if (b.textContent === wordEn) b.classList.add('correct');
+        });
     }
-    return -1;
-}
+    updateStats();
+    updateImgMatchScore();
 
-function getFilledCount() {
-    let count = 0;
-    document.querySelectorAll('.answer-slot').forEach(s => {
-        if (s.classList.contains('filled')) count++;
-    });
-    return count;
-}
-
-function addLetter(btn, letter, idx) {
-    if (btn.classList.contains('used')) return;
-    btn.classList.add('used');
-
-    const slotIdx = getNextEmptySlotIdx();
-    if (slotIdx === -1) return;
-
-    const slots = document.querySelectorAll('.answer-slot');
-    slots[slotIdx].textContent = letter;
-    slots[slotIdx].classList.add('filled');
-
-    scrambleCurrent.push({ letter: letter, btnIdx: idx, slotIdx: slotIdx });
-
-    // Check if all non-space slots filled
-    const totalLetters = scrambleAnswer.replace(/ /g, '').length;
-    if (getFilledCount() === totalLetters) {
-        // Build attempt
-        let attempt = '';
-        for (let i = 0; i < scrambleAnswer.length; i++) {
-            if (scrambleAnswer[i] === ' ') {
-                attempt += ' ';
-            } else {
-                attempt += slots[i].textContent;
-            }
-        }
-
-        stageTotal++;
-        if (attempt === scrambleAnswer) {
-            playCorrectSound();
-            showFloatingFeedback('\u{2B50}');
-            streak++;
-            stageCorrect++;
-            addStars(2);
-            markWordLearned(scrambleWords[scrambleIndex].en);
-            updateStats();
-            updateScrambleScore();
-            setTimeout(function() { scrambleIndex++; showScrambleWord(); }, 1000);
-        } else {
-            playWrongSound();
-            showFloatingFeedback('\u{1F504}');
-            streak = 0;
-            updateStats();
-            updateScrambleScore();
-            setTimeout(function() {
-                scrambleCurrent = [];
-                document.querySelectorAll('.scramble-letter').forEach(b => b.classList.remove('used'));
-                document.querySelectorAll('.answer-slot:not(.space-slot)').forEach(s => {
-                    s.textContent = '';
-                    s.classList.remove('filled');
-                });
-            }, 600);
-        }
-    }
-}
-
-function removeFromSlot(slotIdx) {
-    // Find the entry for this slot
-    const entryIdx = scrambleCurrent.findIndex(e => e.slotIdx === slotIdx);
-    if (entryIdx === -1) return;
-
-    // Remove this and all entries that were placed after it
-    const toRemove = scrambleCurrent.splice(entryIdx);
-    toRemove.forEach(function(item) {
-        const btn = document.querySelectorAll('.scramble-letter')[item.btnIdx];
-        if (btn) btn.classList.remove('used');
-        const slot = document.querySelectorAll('.answer-slot')[item.slotIdx];
-        if (slot) { slot.textContent = ''; slot.classList.remove('filled'); }
-    });
-}
-
-function scrambleHint() {
-    // Reset everything
-    scrambleCurrent.forEach(function(item) {
-        const btn = document.querySelectorAll('.scramble-letter')[item.btnIdx];
-        if (btn) btn.classList.remove('used');
-        const slot = document.querySelectorAll('.answer-slot')[item.slotIdx];
-        if (slot) { slot.textContent = ''; slot.classList.remove('filled'); }
-    });
-    scrambleCurrent = [];
-
-    // Find first non-space letter
-    let firstLetter = '';
-    for (let i = 0; i < scrambleAnswer.length; i++) {
-        if (scrambleAnswer[i] !== ' ') { firstLetter = scrambleAnswer[i]; break; }
-    }
-
-    const btns = document.querySelectorAll('.scramble-letter');
-    for (const btn of btns) {
-        if (btn.textContent === firstLetter && !btn.classList.contains('used')) {
-            addLetter(btn, firstLetter, parseInt(btn.dataset.idx));
-            break;
-        }
-    }
+    setTimeout(function() {
+        imgmatchIndex++;
+        showImgMatchQuestion();
+    }, 1200);
 }
 
 // ========== CATCHER MODE ==========
