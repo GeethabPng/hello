@@ -1320,9 +1320,10 @@ function flipMemoryCard(index) {
 }
 
 // ========== TOUCH SUPPORT ==========
+// Prevent double-tap zoom only on catcher control buttons (which use ontouchstart/ontouchend)
+// Do NOT preventDefault on other elements - it blocks their onclick handlers on touch devices
 document.addEventListener('touchstart', e => {
-    // Prevent double-tap zoom on buttons
-    if (e.target.closest('.catcher-ctrl-btn, .quiz-option, .scramble-letter, .menu-card')) {
+    if (e.target.closest('.catcher-ctrl-btn')) {
         e.preventDefault();
     }
 }, { passive: false });
