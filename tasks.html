@@ -441,6 +441,53 @@
             cursor: pointer;
         }
 
+        /* Export/Import Bar */
+        .data-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-export {
+            padding: 8px 18px;
+            background: #1b5e20;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-export:hover {
+            background: #2e7d32;
+        }
+
+        .btn-import {
+            padding: 8px 18px;
+            background: #1565c0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-import:hover {
+            background: #1976d2;
+        }
+
+        .hidden-input {
+            display: none;
+        }
+
         @media (max-width: 600px) {
             .app-container { padding: 10px; }
             header h1 { font-size: 1.5rem; }
@@ -497,6 +544,13 @@
                 </select>
                 <input type="date" id="taskDueDate" />
             </div>
+        </div>
+
+        <!-- Export/Import -->
+        <div class="data-bar">
+            <button class="btn-export" onclick="exportTasks()">&#x1F4BE; ייצוא משימות</button>
+            <button class="btn-import" onclick="document.getElementById('importFile').click()">&#x1F4C2; ייבוא משימות</button>
+            <input type="file" id="importFile" class="hidden-input" accept=".json" onchange="importTasks(event)" />
         </div>
 
         <!-- Category Manager -->
@@ -779,6 +833,44 @@
             document.getElementById('statActive').textContent = active;
             document.getElementById('statCompleted').textContent = completed;
             document.getElementById('statOverdue').textContent = overdue;
+        }
+
+        // Export/Import
+        function exportTasks() {
+            const data = JSON.stringify({ tasks: tasks, categories: categories }, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tasks-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importTasks(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!Array.isArray(data.tasks)) {
+                        alert('הקובץ לא תקין - לא נמצאו משימות');
+                        return;
+                    }
+                    if (confirm('לייבא ' + data.tasks.length + ' משימות? (המשימות הקיימות יוחלפו)')) {
+                        tasks = data.tasks;
+                        if (Array.isArray(data.categories)) categories = data.categories;
+                        save();
+                        renderCategories();
+                        renderTasks();
+                    }
+                } catch (err) {
+                    alert('שגיאה בקריאת הקובץ: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
         }
 
         // Init
