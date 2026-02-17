@@ -312,6 +312,15 @@
             font-weight: 600;
         }
 
+        .task-notes {
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 3px;
+            font-style: italic;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
         .task-actions {
             display: flex;
             gap: 6px;
@@ -441,6 +450,59 @@
             cursor: pointer;
         }
 
+        .btn-clear {
+            padding: 8px 18px;
+            background: #b71c1c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-clear:hover {
+            background: #c62828;
+        }
+
+        /* Category tag with delete */
+        .category-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #e8daef;
+            color: #533483;
+            border-radius: 12px;
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin: 2px;
+        }
+
+        .category-tag .del-cat {
+            background: none;
+            border: none;
+            color: #533483;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+            line-height: 1;
+            opacity: 0.6;
+        }
+
+        .category-tag .del-cat:hover {
+            opacity: 1;
+        }
+
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
         /* Export/Import Bar */
         .data-bar {
             display: flex;
@@ -544,12 +606,16 @@
                 </select>
                 <input type="date" id="taskDueDate" />
             </div>
+            <div class="form-row">
+                <input type="text" id="taskNotes" placeholder="הערות (אופציונלי)..." style="flex:1;" />
+            </div>
         </div>
 
         <!-- Export/Import -->
         <div class="data-bar">
             <button class="btn-export" onclick="exportTasks()">&#x1F4BE; ייצוא משימות</button>
             <button class="btn-import" onclick="document.getElementById('importFile').click()">&#x1F4C2; ייבוא משימות</button>
+            <button class="btn-clear" onclick="clearCompleted()">&#x1F5D1; מחק שהושלמו</button>
             <input type="file" id="importFile" class="hidden-input" accept=".json" onchange="importTasks(event)" />
         </div>
 
@@ -558,6 +624,7 @@
             <input type="text" id="newCategory" placeholder="קטגוריה חדשה..." />
             <button class="btn-small" onclick="addCategory()">הוסף קטגוריה</button>
         </div>
+        <div class="category-tags" id="categoryTags"></div>
 
         <!-- Toolbar -->
         <div class="toolbar">
@@ -607,6 +674,10 @@
                 <label>תאריך יעד</label>
                 <input type="date" id="editDueDate" />
             </div>
+            <div class="modal-field">
+                <label>הערות</label>
+                <input type="text" id="editNotes" placeholder="הערות..." />
+            </div>
             <div class="modal-actions">
                 <button class="btn-save" onclick="saveEdit()">שמור</button>
                 <button class="btn-cancel" onclick="closeModal()">ביטול</button>
@@ -629,15 +700,29 @@
         }
 
         // Categories
+        function escapeAttr(str) {
+            return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
         function renderCategories() {
             const options = '<option value="">ללא קטגוריה</option>' +
-                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+                categories.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('taskCategory').innerHTML = options;
             document.getElementById('editCategory').innerHTML = options;
 
             const filterOptions = '<option value="">כל הקטגוריות</option>' +
-                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+                categories.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('filterCategory').innerHTML = filterOptions;
+
+            // Render category tags with delete buttons
+            const tagsEl = document.getElementById('categoryTags');
+            if (categories.length === 0) {
+                tagsEl.innerHTML = '';
+            } else {
+                tagsEl.innerHTML = categories.map((c, i) =>
+                    `<span class="category-tag">${escapeHtml(c)}<button class="del-cat" onclick="deleteCategory(${i})" title="מחק קטגוריה">&#x2715;</button></span>`
+                ).join('');
+            }
         }
 
         function addCategory() {
@@ -654,6 +739,17 @@
             input.value = '';
         }
 
+        function deleteCategory(index) {
+            const name = categories[index];
+            if (!confirm(`למחוק את הקטגוריה "${name}"?`)) return;
+            categories.splice(index, 1);
+            // Clear category from tasks that used it
+            tasks.forEach(t => { if (t.category === name) t.category = ''; });
+            save();
+            renderCategories();
+            renderTasks();
+        }
+
         // Tasks
         function addTask() {
             const titleEl = document.getElementById('taskTitle');
@@ -663,6 +759,7 @@
             tasks.push({
                 id: generateId(),
                 title: title,
+                notes: document.getElementById('taskNotes').value.trim(),
                 category: document.getElementById('taskCategory').value,
                 priority: document.getElementById('taskPriority').value,
                 dueDate: document.getElementById('taskDueDate').value,
@@ -672,6 +769,7 @@
 
             save();
             titleEl.value = '';
+            document.getElementById('taskNotes').value = '';
             document.getElementById('taskDueDate').value = '';
             renderTasks();
             titleEl.focus();
@@ -697,11 +795,21 @@
             renderTasks();
         }
 
+        function clearCompleted() {
+            const count = tasks.filter(t => t.completed).length;
+            if (count === 0) { alert('אין משימות שהושלמו'); return; }
+            if (!confirm(`למחוק ${count} משימות שהושלמו?`)) return;
+            tasks = tasks.filter(t => !t.completed);
+            save();
+            renderTasks();
+        }
+
         function openEdit(id) {
             const task = tasks.find(t => t.id === id);
             if (!task) return;
             document.getElementById('editId').value = id;
             document.getElementById('editTitle').value = task.title;
+            document.getElementById('editNotes').value = task.notes || '';
             document.getElementById('editCategory').value = task.category;
             document.getElementById('editPriority').value = task.priority;
             document.getElementById('editDueDate').value = task.dueDate;
@@ -717,6 +825,7 @@
             const task = tasks.find(t => t.id === id);
             if (!task) return;
             task.title = document.getElementById('editTitle').value.trim();
+            task.notes = document.getElementById('editNotes').value.trim();
             task.category = document.getElementById('editCategory').value;
             task.priority = document.getElementById('editPriority').value;
             task.dueDate = document.getElementById('editDueDate').value;
@@ -801,6 +910,7 @@
                         onchange="toggleTask('${t.id}')" />
                     <div class="task-content">
                         <div class="task-title">${escapeHtml(t.title)}</div>
+                        ${t.notes ? `<div class="task-notes">${escapeHtml(t.notes)}</div>` : ''}
                         <div class="task-meta">
                             ${t.category ? `<span class="task-badge badge-category">${escapeHtml(t.category)}</span>` : ''}
                             <span class="task-badge badge-priority-${t.priority}">${priorityLabels[t.priority]}</span>
