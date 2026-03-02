@@ -676,6 +676,23 @@
             background: #1976d2;
         }
 
+        .btn-download-app {
+            padding: 8px 18px;
+            background: #4a148c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-download-app:hover {
+            background: #6a1b9a;
+        }
+
         .hidden-input {
             display: none;
         }
@@ -806,6 +823,7 @@
             <button class="btn-export" onclick="exportTasks()">&#x1F4BE; ייצוא משימות</button>
             <button class="btn-import" onclick="document.getElementById('importFile').click()">&#x1F4C2; ייבוא משימות</button>
             <input type="file" id="importFile" class="hidden-input" accept=".json" onchange="importTasks(event)" />
+            <button class="btn-download-app" onclick="downloadApp()">&#x2B07;&#xFE0F; הורד אפליקציה</button>
         </div>
 
         <!-- Category Manager -->
@@ -1258,6 +1276,19 @@
             document.getElementById('statActive').textContent = active;
             document.getElementById('statCompleted').textContent = completed;
             document.getElementById('statOverdue').textContent = overdue;
+        }
+
+        // Download app as standalone HTML file
+        function downloadApp() {
+            const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'task-manager.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('הקובץ הורד בהצלחה ✓');
         }
 
         // Export/Import
