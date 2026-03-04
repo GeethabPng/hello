@@ -19,7 +19,7 @@
         }
 
         .app-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -178,16 +178,24 @@
             cursor: pointer;
         }
 
-        /* Category Management */
-        .category-manager {
+        /* Category / Employee Management */
+        .managers-row {
             display: flex;
-            gap: 8px;
-            align-items: center;
+            gap: 12px;
             margin-bottom: 15px;
             flex-wrap: wrap;
         }
 
-        .category-manager input {
+        .manager-box {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .manager-box input {
+            flex: 1;
             padding: 7px 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -195,7 +203,7 @@
             font-family: inherit;
         }
 
-        .category-manager input:focus {
+        .manager-box input:focus {
             outline: none;
             border-color: #533483;
         }
@@ -211,6 +219,7 @@
             cursor: pointer;
             font-weight: 600;
             transition: background 0.2s;
+            white-space: nowrap;
         }
 
         .btn-small:hover {
@@ -285,6 +294,11 @@
         .badge-category {
             background: #e8f4fd;
             color: #1976d2;
+        }
+
+        .badge-employee {
+            background: #f3e5f5;
+            color: #7b1fa2;
         }
 
         .badge-priority-high {
@@ -488,6 +502,150 @@
             display: none;
         }
 
+        /* ===== DASHBOARDS ===== */
+        .dashboard-section {
+            margin-bottom: 20px;
+        }
+
+        .dashboard-toggle-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            justify-content: center;
+        }
+
+        .btn-dashboard {
+            padding: 9px 22px;
+            background: white;
+            color: #533483;
+            border: 2px solid #533483;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-dashboard.active {
+            background: #533483;
+            color: white;
+        }
+
+        .btn-dashboard:hover:not(.active) {
+            background: #f3eaff;
+        }
+
+        .dashboards-wrapper {
+            display: none;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .dashboards-wrapper.visible {
+            display: flex;
+        }
+
+        .dashboard-panel {
+            flex: 1;
+            min-width: 280px;
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-panel h3 {
+            font-size: 1rem;
+            color: #16213e;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2f5;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dashboard-empty {
+            text-align: center;
+            color: #bbb;
+            padding: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .dash-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+
+        .dash-table thead th {
+            text-align: right;
+            color: #888;
+            font-weight: 600;
+            padding: 4px 6px 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dash-table thead th:not(:first-child) {
+            text-align: center;
+        }
+
+        .dash-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .dash-table tbody td {
+            padding: 7px 6px;
+            border-bottom: 1px solid #f5f5f5;
+            vertical-align: middle;
+        }
+
+        .dash-table tbody td:not(:first-child) {
+            text-align: center;
+        }
+
+        .dash-name {
+            font-weight: 500;
+            max-width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dash-bar-cell {
+            width: 80px;
+        }
+
+        .dash-bar-wrap {
+            background: #f0f2f5;
+            border-radius: 4px;
+            height: 7px;
+            overflow: hidden;
+        }
+
+        .dash-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: #533483;
+            transition: width 0.4s ease;
+        }
+
+        .badge-num {
+            display: inline-block;
+            padding: 1px 7px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            min-width: 22px;
+            text-align: center;
+        }
+
+        .num-total   { background: #e8eaf6; color: #3949ab; }
+        .num-active  { background: #e3f2fd; color: #1565c0; }
+        .num-done    { background: #e8f5e9; color: #2e7d32; }
+        .num-overdue { background: #fdecea; color: #c62828; }
+
         @media (max-width: 600px) {
             .app-container { padding: 10px; }
             header h1 { font-size: 1.5rem; }
@@ -496,6 +654,7 @@
             .stat-card .stat-number { font-size: 1.3rem; }
             .form-row { flex-direction: column; }
             .form-row input[type="text"] { min-width: auto; }
+            .dash-bar-cell { display: none; }
         }
     </style>
 </head>
@@ -537,6 +696,9 @@
                 <select id="taskCategory">
                     <option value="">ללא קטגוריה</option>
                 </select>
+                <select id="taskEmployee">
+                    <option value="">ללא עובד</option>
+                </select>
                 <select id="taskPriority">
                     <option value="low">עדיפות נמוכה</option>
                     <option value="medium">עדיפות בינונית</option>
@@ -553,10 +715,36 @@
             <input type="file" id="importFile" class="hidden-input" accept=".json" onchange="importTasks(event)" />
         </div>
 
-        <!-- Category Manager -->
-        <div class="category-manager">
-            <input type="text" id="newCategory" placeholder="קטגוריה חדשה..." />
-            <button class="btn-small" onclick="addCategory()">הוסף קטגוריה</button>
+        <!-- Category + Employee Managers -->
+        <div class="managers-row">
+            <div class="manager-box">
+                <input type="text" id="newCategory" placeholder="קטגוריה חדשה..." />
+                <button class="btn-small" onclick="addCategory()">+ קטגוריה</button>
+            </div>
+            <div class="manager-box">
+                <input type="text" id="newEmployee" placeholder="עובד חדש..." />
+                <button class="btn-small" onclick="addEmployee()">+ עובד</button>
+            </div>
+        </div>
+
+        <!-- Dashboard Toggle -->
+        <div class="dashboard-section">
+            <div class="dashboard-toggle-bar">
+                <button class="btn-dashboard" id="btnDashCat" onclick="toggleDashboard('category')">&#x1F4CA; דשבורד לפי קטגוריה</button>
+                <button class="btn-dashboard" id="btnDashEmp" onclick="toggleDashboard('employee')">&#x1F464; דשבורד לפי עובד</button>
+            </div>
+            <div class="dashboards-wrapper" id="dashboardsWrapper">
+                <!-- Category Dashboard -->
+                <div class="dashboard-panel" id="dashCategory">
+                    <h3>&#x1F4CA; סטטוס לפי קטגוריה</h3>
+                    <div id="dashCategoryContent"></div>
+                </div>
+                <!-- Employee Dashboard -->
+                <div class="dashboard-panel" id="dashEmployee">
+                    <h3>&#x1F464; סטטוס לפי עובד</h3>
+                    <div id="dashEmployeeContent"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Toolbar -->
@@ -564,6 +752,9 @@
             <input type="text" class="search-box" id="searchBox" placeholder="&#x1F50D; חיפוש משימות..." oninput="renderTasks()" />
             <select id="filterCategory" onchange="renderTasks()">
                 <option value="">כל הקטגוריות</option>
+            </select>
+            <select id="filterEmployee" onchange="renderTasks()">
+                <option value="">כל העובדים</option>
             </select>
             <select id="filterStatus" onchange="renderTasks()">
                 <option value="">הכל</option>
@@ -596,6 +787,10 @@
                 <select id="editCategory"></select>
             </div>
             <div class="modal-field">
+                <label>עובד אחראי</label>
+                <select id="editEmployee"></select>
+            </div>
+            <div class="modal-field">
                 <label>עדיפות</label>
                 <select id="editPriority">
                     <option value="low">נמוכה</option>
@@ -616,58 +811,86 @@
 
     <script>
         // State
-        let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+        let tasks      = JSON.parse(localStorage.getItem('tasks')      || '[]');
         let categories = JSON.parse(localStorage.getItem('categories') || '["עבודה","אישי","קניות","לימודים"]');
+        let employees  = JSON.parse(localStorage.getItem('employees')  || '[]');
+
+        // Which dashboards are currently visible
+        let dashVisible = { category: false, employee: false };
 
         function save() {
-            localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('tasks',      JSON.stringify(tasks));
             localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('employees',  JSON.stringify(employees));
         }
 
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
         }
 
-        // Categories
+        // ── Categories ──────────────────────────────────────────────────────────
         function renderCategories() {
             const options = '<option value="">ללא קטגוריה</option>' +
-                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+                categories.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('taskCategory').innerHTML = options;
             document.getElementById('editCategory').innerHTML = options;
 
             const filterOptions = '<option value="">כל הקטגוריות</option>' +
-                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+                categories.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('filterCategory').innerHTML = filterOptions;
         }
 
         function addCategory() {
             const input = document.getElementById('newCategory');
-            const name = input.value.trim();
+            const name  = input.value.trim();
             if (!name) return;
-            if (categories.includes(name)) {
-                alert('קטגוריה זו כבר קיימת');
-                return;
-            }
+            if (categories.includes(name)) { alert('קטגוריה זו כבר קיימת'); return; }
             categories.push(name);
             save();
             renderCategories();
+            renderDashboards();
             input.value = '';
         }
 
-        // Tasks
+        // ── Employees ────────────────────────────────────────────────────────────
+        function renderEmployees() {
+            const options = '<option value="">ללא עובד</option>' +
+                employees.map(e => `<option value="${escapeAttr(e)}">${escapeHtml(e)}</option>`).join('');
+            document.getElementById('taskEmployee').innerHTML  = options;
+            document.getElementById('editEmployee').innerHTML  = options;
+
+            const filterOptions = '<option value="">כל העובדים</option>' +
+                employees.map(e => `<option value="${escapeAttr(e)}">${escapeHtml(e)}</option>`).join('');
+            document.getElementById('filterEmployee').innerHTML = filterOptions;
+        }
+
+        function addEmployee() {
+            const input = document.getElementById('newEmployee');
+            const name  = input.value.trim();
+            if (!name) return;
+            if (employees.includes(name)) { alert('עובד זה כבר קיים'); return; }
+            employees.push(name);
+            save();
+            renderEmployees();
+            renderDashboards();
+            input.value = '';
+        }
+
+        // ── Tasks ────────────────────────────────────────────────────────────────
         function addTask() {
             const titleEl = document.getElementById('taskTitle');
-            const title = titleEl.value.trim();
+            const title   = titleEl.value.trim();
             if (!title) return;
 
             tasks.push({
-                id: generateId(),
-                title: title,
-                category: document.getElementById('taskCategory').value,
-                priority: document.getElementById('taskPriority').value,
-                dueDate: document.getElementById('taskDueDate').value,
-                completed: false,
-                createdAt: new Date().toISOString()
+                id:         generateId(),
+                title:      title,
+                category:   document.getElementById('taskCategory').value,
+                assignedTo: document.getElementById('taskEmployee').value,
+                priority:   document.getElementById('taskPriority').value,
+                dueDate:    document.getElementById('taskDueDate').value,
+                completed:  false,
+                createdAt:  new Date().toISOString()
             });
 
             save();
@@ -700,11 +923,12 @@
         function openEdit(id) {
             const task = tasks.find(t => t.id === id);
             if (!task) return;
-            document.getElementById('editId').value = id;
-            document.getElementById('editTitle').value = task.title;
-            document.getElementById('editCategory').value = task.category;
+            document.getElementById('editId').value       = id;
+            document.getElementById('editTitle').value    = task.title;
+            document.getElementById('editCategory').value = task.category  || '';
+            document.getElementById('editEmployee').value = task.assignedTo || '';
             document.getElementById('editPriority').value = task.priority;
-            document.getElementById('editDueDate').value = task.dueDate;
+            document.getElementById('editDueDate').value  = task.dueDate;
             document.getElementById('editModal').classList.add('active');
         }
 
@@ -713,19 +937,19 @@
         }
 
         function saveEdit() {
-            const id = document.getElementById('editId').value;
+            const id   = document.getElementById('editId').value;
             const task = tasks.find(t => t.id === id);
             if (!task) return;
-            task.title = document.getElementById('editTitle').value.trim();
-            task.category = document.getElementById('editCategory').value;
-            task.priority = document.getElementById('editPriority').value;
-            task.dueDate = document.getElementById('editDueDate').value;
+            task.title      = document.getElementById('editTitle').value.trim();
+            task.category   = document.getElementById('editCategory').value;
+            task.assignedTo = document.getElementById('editEmployee').value;
+            task.priority   = document.getElementById('editPriority').value;
+            task.dueDate    = document.getElementById('editDueDate').value;
             save();
             closeModal();
             renderTasks();
         }
 
-        // Close modal on overlay click
         document.getElementById('editModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
@@ -741,28 +965,27 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return '';
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('he-IL');
+            return new Date(dateStr).toLocaleDateString('he-IL');
         }
 
         function renderTasks() {
-            const search = document.getElementById('searchBox').value.trim().toLowerCase();
-            const filterCat = document.getElementById('filterCategory').value;
+            const search       = document.getElementById('searchBox').value.trim().toLowerCase();
+            const filterCat    = document.getElementById('filterCategory').value;
+            const filterEmp    = document.getElementById('filterEmployee').value;
             const filterStatus = document.getElementById('filterStatus').value;
-            const sortBy = document.getElementById('sortBy').value;
+            const sortBy       = document.getElementById('sortBy').value;
 
             let filtered = tasks.filter(t => {
-                if (search && !t.title.toLowerCase().includes(search)) return false;
-                if (filterCat && t.category !== filterCat) return false;
-                if (filterStatus === 'active' && t.completed) return false;
-                if (filterStatus === 'completed' && !t.completed) return false;
+                if (search     && !t.title.toLowerCase().includes(search)) return false;
+                if (filterCat  && t.category   !== filterCat)              return false;
+                if (filterEmp  && t.assignedTo  !== filterEmp)             return false;
+                if (filterStatus === 'active'    &&  t.completed)          return false;
+                if (filterStatus === 'completed' && !t.completed)          return false;
                 return true;
             });
 
             filtered.sort((a, b) => {
-                // Completed tasks always at the bottom
                 if (a.completed !== b.completed) return a.completed ? 1 : -1;
-
                 switch (sortBy) {
                     case 'priority':
                         return priorityValue(b.priority) - priorityValue(a.priority);
@@ -773,7 +996,7 @@
                         return new Date(a.dueDate) - new Date(b.dueDate);
                     case 'alpha':
                         return a.title.localeCompare(b.title, 'he');
-                    default: // created
+                    default:
                         return new Date(b.createdAt) - new Date(a.createdAt);
                 }
             });
@@ -787,6 +1010,7 @@
                         <p>${tasks.length === 0 ? 'אין משימות עדיין. הוסף משימה חדשה!' : 'לא נמצאו משימות התואמות לחיפוש'}</p>
                     </div>`;
                 updateStats();
+                renderDashboards();
                 return;
             }
 
@@ -802,19 +1026,21 @@
                     <div class="task-content">
                         <div class="task-title">${escapeHtml(t.title)}</div>
                         <div class="task-meta">
-                            ${t.category ? `<span class="task-badge badge-category">${escapeHtml(t.category)}</span>` : ''}
+                            ${t.category   ? `<span class="task-badge badge-category">${escapeHtml(t.category)}</span>`    : ''}
+                            ${t.assignedTo ? `<span class="task-badge badge-employee">&#x1F464; ${escapeHtml(t.assignedTo)}</span>` : ''}
                             <span class="task-badge badge-priority-${t.priority}">${priorityLabels[t.priority]}</span>
                             ${t.dueDate ? `<span class="task-due ${overdue ? 'overdue' : ''}">${overdue ? '⚠ ' : ''}${formatDate(t.dueDate)}</span>` : ''}
                         </div>
                     </div>
                     <div class="task-actions">
-                        <button class="btn-icon btn-edit" onclick="openEdit('${t.id}')" title="ערוך">&#x270F;&#xFE0F;</button>
+                        <button class="btn-icon btn-edit"   onclick="openEdit('${t.id}')"   title="ערוך">&#x270F;&#xFE0F;</button>
                         <button class="btn-icon btn-delete" onclick="deleteTask('${t.id}')" title="מחק">&#x1F5D1;&#xFE0F;</button>
                     </div>
                 </div>`;
             }).join('');
 
             updateStats();
+            renderDashboards();
         }
 
         function escapeHtml(str) {
@@ -823,25 +1049,125 @@
             return div.innerHTML;
         }
 
-        function updateStats() {
-            const total = tasks.length;
-            const completed = tasks.filter(t => t.completed).length;
-            const active = total - completed;
-            const overdue = tasks.filter(t => isOverdue(t)).length;
-
-            document.getElementById('statTotal').textContent = total;
-            document.getElementById('statActive').textContent = active;
-            document.getElementById('statCompleted').textContent = completed;
-            document.getElementById('statOverdue').textContent = overdue;
+        function escapeAttr(str) {
+            return String(str).replace(/"/g, '&quot;');
         }
 
-        // Export/Import
+        function updateStats() {
+            const total     = tasks.length;
+            const completed = tasks.filter(t =>  t.completed).length;
+            const active    = total - completed;
+            const overdue   = tasks.filter(t => isOverdue(t)).length;
+
+            document.getElementById('statTotal').textContent     = total;
+            document.getElementById('statActive').textContent    = active;
+            document.getElementById('statCompleted').textContent = completed;
+            document.getElementById('statOverdue').textContent   = overdue;
+        }
+
+        // ── Dashboards ───────────────────────────────────────────────────────────
+        function toggleDashboard(type) {
+            dashVisible[type] = !dashVisible[type];
+
+            const btnId = type === 'category' ? 'btnDashCat' : 'btnDashEmp';
+            document.getElementById(btnId).classList.toggle('active', dashVisible[type]);
+
+            const wrapper = document.getElementById('dashboardsWrapper');
+            const catPanel = document.getElementById('dashCategory');
+            const empPanel = document.getElementById('dashEmployee');
+
+            catPanel.style.display = dashVisible.category ? '' : 'none';
+            empPanel.style.display = dashVisible.employee ? '' : 'none';
+
+            const anyVisible = dashVisible.category || dashVisible.employee;
+            wrapper.classList.toggle('visible', anyVisible);
+
+            if (anyVisible) renderDashboards();
+        }
+
+        function buildDashStats(groupKey) {
+            // groupKey: 'category' | 'assignedTo'
+            const map = {};
+
+            tasks.forEach(t => {
+                const key = t[groupKey] || '';
+                if (!map[key]) map[key] = { total: 0, active: 0, completed: 0, overdue: 0 };
+                map[key].total++;
+                if (t.completed)    map[key].completed++;
+                else                map[key].active++;
+                if (isOverdue(t))   map[key].overdue++;
+            });
+
+            return map;
+        }
+
+        function buildDashTable(map, emptyLabel) {
+            const keys = Object.keys(map).sort((a, b) => map[b].total - map[a].total);
+            if (keys.length === 0) {
+                return `<div class="dashboard-empty">אין נתונים להצגה</div>`;
+            }
+
+            const maxTotal = Math.max(...keys.map(k => map[k].total), 1);
+
+            const rows = keys.map(k => {
+                const s    = map[k];
+                const name = k || emptyLabel;
+                const pct  = Math.round((s.total / maxTotal) * 100);
+                return `
+                <tr>
+                    <td class="dash-name" title="${escapeAttr(name)}">${escapeHtml(name)}</td>
+                    <td><span class="badge-num num-total">${s.total}</span></td>
+                    <td><span class="badge-num num-active">${s.active}</span></td>
+                    <td><span class="badge-num num-done">${s.completed}</span></td>
+                    <td><span class="badge-num num-overdue">${s.overdue}</span></td>
+                    <td class="dash-bar-cell">
+                        <div class="dash-bar-wrap">
+                            <div class="dash-bar-fill" style="width:${pct}%"></div>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            return `
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>שם</th>
+                        <th>סה"כ</th>
+                        <th>פעיל</th>
+                        <th>הושלם</th>
+                        <th>באיחור</th>
+                        <th class="dash-bar-cell"></th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>`;
+        }
+
+        function renderDashboards() {
+            if (dashVisible.category) {
+                const map = buildDashStats('category');
+                document.getElementById('dashCategoryContent').innerHTML =
+                    buildDashTable(map, 'ללא קטגוריה');
+            }
+            if (dashVisible.employee) {
+                const map = buildDashStats('assignedTo');
+                document.getElementById('dashEmployeeContent').innerHTML =
+                    buildDashTable(map, 'לא משויך');
+            }
+        }
+
+        // Init dashboard panel visibility
+        document.getElementById('dashCategory').style.display = 'none';
+        document.getElementById('dashEmployee').style.display = 'none';
+
+        // ── Export / Import ───────────────────────────────────────────────────────
         function exportTasks() {
-            const data = JSON.stringify({ tasks: tasks, categories: categories }, null, 2);
+            const data = JSON.stringify({ tasks, categories, employees }, null, 2);
             const blob = new Blob([data], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
             a.download = 'tasks-backup-' + new Date().toISOString().slice(0, 10) + '.json';
             a.click();
             URL.revokeObjectURL(url);
@@ -861,8 +1187,10 @@
                     if (confirm('לייבא ' + data.tasks.length + ' משימות? (המשימות הקיימות יוחלפו)')) {
                         tasks = data.tasks;
                         if (Array.isArray(data.categories)) categories = data.categories;
+                        if (Array.isArray(data.employees))  employees  = data.employees;
                         save();
                         renderCategories();
+                        renderEmployees();
                         renderTasks();
                     }
                 } catch (err) {
@@ -873,8 +1201,9 @@
             event.target.value = '';
         }
 
-        // Init
+        // ── Init ─────────────────────────────────────────────────────────────────
         renderCategories();
+        renderEmployees();
         renderTasks();
     </script>
 </body>
