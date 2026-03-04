@@ -35,6 +35,42 @@
             margin-bottom: 5px;
         }
 
+        .title-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .title-wrapper:hover .edit-title-btn {
+            opacity: 1;
+        }
+
+        .edit-title-btn {
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            line-height: 1;
+        }
+
+        #titleInput {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #16213e;
+            font-family: inherit;
+            border: none;
+            border-bottom: 2px solid #533483;
+            background: transparent;
+            text-align: center;
+            outline: none;
+            width: 100%;
+            max-width: 400px;
+        }
+
         header p {
             color: #666;
             font-size: 0.95rem;
@@ -502,7 +538,15 @@
 <body>
     <div class="app-container">
         <header>
-            <h1>&#x2705; מנהל משימות</h1>
+            <h1 id="appTitleDisplay">
+                <span class="title-wrapper" onclick="startEditTitle()">
+                    <span id="titleText">&#x2705; מנהל משימות</span>
+                    <button class="edit-title-btn" title="שנה כותרת">&#x270F;&#xFE0F;</button>
+                </span>
+                <input type="text" id="titleInput" style="display:none"
+                    onblur="saveTitleEdit()"
+                    onkeydown="if(event.key==='Enter')this.blur(); if(event.key==='Escape')cancelTitleEdit()" />
+            </h1>
             <p>ארגן את המשימות שלך בקלות</p>
         </header>
 
@@ -618,6 +662,40 @@
         // State
         let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
         let categories = JSON.parse(localStorage.getItem('categories') || '["עבודה","אישי","קניות","לימודים"]');
+        let appTitle = localStorage.getItem('appTitle') || '✅ מנהל משימות';
+
+        function startEditTitle() {
+            const display = document.getElementById('titleText');
+            const input = document.getElementById('titleInput');
+            input.value = appTitle;
+            display.closest('.title-wrapper').style.display = 'none';
+            input.style.display = 'inline-block';
+            input.focus();
+            input.select();
+        }
+
+        function saveTitleEdit() {
+            const input = document.getElementById('titleInput');
+            const newTitle = input.value.trim();
+            if (newTitle) {
+                appTitle = newTitle;
+                localStorage.setItem('appTitle', appTitle);
+                document.title = appTitle.replace(/\p{Emoji}/gu, '').trim() || appTitle;
+            }
+            applyTitle();
+        }
+
+        function cancelTitleEdit() {
+            applyTitle();
+        }
+
+        function applyTitle() {
+            const display = document.getElementById('titleText');
+            const input = document.getElementById('titleInput');
+            display.textContent = appTitle;
+            display.closest('.title-wrapper').style.display = '';
+            input.style.display = 'none';
+        }
 
         function save() {
             localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -874,6 +952,7 @@
         }
 
         // Init
+        applyTitle();
         renderCategories();
         renderTasks();
     </script>
