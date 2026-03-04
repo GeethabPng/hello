@@ -18,6 +18,172 @@
             min-height: 100vh;
         }
 
+        /* Top Purple Bar */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #533483;
+            box-shadow: 0 2px 8px rgba(83,52,131,0.4);
+            padding: 0 20px;
+        }
+
+        .top-bar-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 10px 0;
+        }
+
+        /* Editable page title */
+        .page-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .page-title-display {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            border-bottom: 2px dashed rgba(255,255,255,0.4);
+            padding: 2px 4px;
+            transition: border-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .page-title-display:hover {
+            border-color: rgba(255,255,255,0.9);
+        }
+
+        .page-title-input {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #533483;
+            background: white;
+            border: none;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-family: inherit;
+            display: none;
+            min-width: 120px;
+            max-width: 220px;
+        }
+
+        .page-title-input:focus {
+            outline: 2px solid #e8daef;
+        }
+
+        .btn-title-edit {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.65);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 2px 4px;
+            transition: color 0.2s;
+        }
+
+        .btn-title-edit:hover {
+            color: white;
+        }
+
+        .top-bar-divider {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.3);
+            flex-shrink: 0;
+        }
+
+        /* Category section inside top bar */
+        .top-cat-manager {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .top-cat-input {
+            padding: 5px 10px;
+            border: 2px solid rgba(255,255,255,0.35);
+            border-radius: 7px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            transition: border-color 0.2s, background 0.2s;
+            min-width: 110px;
+        }
+
+        .top-cat-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .top-cat-input:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.25);
+        }
+
+        .btn-top-add-cat {
+            padding: 5px 12px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 7px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-top-add-cat:hover {
+            background: rgba(255,255,255,0.35);
+        }
+
+        .top-cat-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .top-category-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 12px;
+            padding: 3px 8px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .top-category-tag .del-cat {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .top-category-tag .del-cat:hover {
+            color: white;
+        }
+
         .app-container {
             max-width: 800px;
             margin: 0 auto;
@@ -26,7 +192,7 @@
 
         header {
             text-align: center;
-            padding: 30px 0 20px;
+            padding: 20px 0 15px;
         }
 
         header h1 {
@@ -176,28 +342,6 @@
             font-family: inherit;
             background: white;
             cursor: pointer;
-        }
-
-        /* Category Management */
-        .category-manager {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .category-manager input {
-            padding: 7px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-family: inherit;
-        }
-
-        .category-manager input:focus {
-            outline: none;
-            border-color: #533483;
         }
 
         .btn-small {
@@ -467,41 +611,6 @@
             background: #c62828;
         }
 
-        /* Category tag with delete */
-        .category-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: #e8daef;
-            color: #533483;
-            border-radius: 12px;
-            padding: 3px 8px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            margin: 2px;
-        }
-
-        .category-tag .del-cat {
-            background: none;
-            border: none;
-            color: #533483;
-            cursor: pointer;
-            font-size: 0.9rem;
-            padding: 0;
-            line-height: 1;
-            opacity: 0.6;
-        }
-
-        .category-tag .del-cat:hover {
-            opacity: 1;
-        }
-
-        .category-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            margin-top: 8px;
-        }
 
         /* Export/Import Bar */
         .data-bar {
@@ -562,9 +671,33 @@
     </style>
 </head>
 <body>
+
+    <!-- Purple Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-inner">
+            <!-- Editable Page Title -->
+            <div class="page-title-wrap">
+                <span class="page-title-display" id="pageTitleDisplay" onclick="startEditTitle()" title="לחץ לעריכת הכותרת"></span>
+                <input class="page-title-input" id="pageTitleInput" type="text" maxlength="40"
+                    onblur="saveTitle()" onkeydown="titleKeyDown(event)" />
+                <button class="btn-title-edit" onclick="startEditTitle()" title="ערוך כותרת">&#x270F;&#xFE0F;</button>
+            </div>
+
+            <div class="top-bar-divider"></div>
+
+            <!-- Category Manager -->
+            <div class="top-cat-manager">
+                <input class="top-cat-input" type="text" id="newCategory" placeholder="קטגוריה חדשה..."
+                    onkeydown="if(event.key==='Enter') addCategory()" />
+                <button class="btn-top-add-cat" onclick="addCategory()">+ הוסף קטגוריה</button>
+                <div class="top-cat-tags" id="categoryTags"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="app-container">
         <header>
-            <h1>&#x2705; מנהל משימות</h1>
+            <h1 id="mainHeading">&#x2705; מנהל משימות</h1>
             <p>ארגן את המשימות שלך בקלות</p>
         </header>
 
@@ -618,13 +751,6 @@
             <button class="btn-clear" onclick="clearCompleted()">&#x1F5D1; מחק שהושלמו</button>
             <input type="file" id="importFile" class="hidden-input" accept=".json" onchange="importTasks(event)" />
         </div>
-
-        <!-- Category Manager -->
-        <div class="category-manager">
-            <input type="text" id="newCategory" placeholder="קטגוריה חדשה..." />
-            <button class="btn-small" onclick="addCategory()">הוסף קטגוריה</button>
-        </div>
-        <div class="category-tags" id="categoryTags"></div>
 
         <!-- Toolbar -->
         <div class="toolbar">
@@ -689,6 +815,44 @@
         // State
         let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
         let categories = JSON.parse(localStorage.getItem('categories') || '["עבודה","אישי","קניות","לימודים"]');
+        let pageTitle = localStorage.getItem('pageTitle') || 'לוח בקרה';
+
+        // Page title editing
+        function initTitle() {
+            document.getElementById('pageTitleDisplay').textContent = pageTitle;
+            document.getElementById('mainHeading').textContent = '✅ ' + pageTitle;
+            document.title = pageTitle;
+        }
+
+        function startEditTitle() {
+            const display = document.getElementById('pageTitleDisplay');
+            const input = document.getElementById('pageTitleInput');
+            display.style.display = 'none';
+            input.value = pageTitle;
+            input.style.display = 'inline-block';
+            input.focus();
+            input.select();
+        }
+
+        function saveTitle() {
+            const input = document.getElementById('pageTitleInput');
+            const val = input.value.trim();
+            if (val) {
+                pageTitle = val;
+                localStorage.setItem('pageTitle', pageTitle);
+            }
+            input.style.display = 'none';
+            document.getElementById('pageTitleDisplay').style.display = '';
+            initTitle();
+        }
+
+        function titleKeyDown(e) {
+            if (e.key === 'Enter') saveTitle();
+            if (e.key === 'Escape') {
+                document.getElementById('pageTitleInput').style.display = 'none';
+                document.getElementById('pageTitleDisplay').style.display = '';
+            }
+        }
 
         function save() {
             localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -714,13 +878,13 @@
                 categories.map(c => `<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('filterCategory').innerHTML = filterOptions;
 
-            // Render category tags with delete buttons
+            // Render category tags in top bar
             const tagsEl = document.getElementById('categoryTags');
             if (categories.length === 0) {
                 tagsEl.innerHTML = '';
             } else {
                 tagsEl.innerHTML = categories.map((c, i) =>
-                    `<span class="category-tag">${escapeHtml(c)}<button class="del-cat" onclick="deleteCategory(${i})" title="מחק קטגוריה">&#x2715;</button></span>`
+                    `<span class="top-category-tag">${escapeHtml(c)}<button class="del-cat" onclick="deleteCategory(${i})" title="מחק קטגוריה">&#x2715;</button></span>`
                 ).join('');
             }
         }
@@ -984,6 +1148,7 @@
         }
 
         // Init
+        initTitle();
         renderCategories();
         renderTasks();
     </script>
