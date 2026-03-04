@@ -217,6 +217,50 @@
             background: #d2b4de;
         }
 
+        /* Worker Management */
+        .worker-manager {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .worker-manager input {
+            padding: 7px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+
+        .worker-manager input:focus {
+            outline: none;
+            border-color: #0f766e;
+        }
+
+        .btn-small-worker {
+            padding: 7px 14px;
+            background: #ccfbf1;
+            color: #0f766e;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn-small-worker:hover {
+            background: #99f6e4;
+        }
+
+        .badge-worker {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
         /* Task List */
         .task-list {
             display: flex;
@@ -542,6 +586,9 @@
                     <option value="medium">עדיפות בינונית</option>
                     <option value="high">עדיפות גבוהה</option>
                 </select>
+                <select id="taskWorker">
+                    <option value="">ללא עובד אחראי</option>
+                </select>
                 <input type="date" id="taskDueDate" />
             </div>
         </div>
@@ -557,6 +604,12 @@
         <div class="category-manager">
             <input type="text" id="newCategory" placeholder="קטגוריה חדשה..." />
             <button class="btn-small" onclick="addCategory()">הוסף קטגוריה</button>
+        </div>
+
+        <!-- Worker Manager -->
+        <div class="worker-manager">
+            <input type="text" id="newWorker" placeholder="שם עובד חדש..." />
+            <button class="btn-small-worker" onclick="addWorker()">&#x1F464; הוסף עובד</button>
         </div>
 
         <!-- Toolbar -->
@@ -604,6 +657,10 @@
                 </select>
             </div>
             <div class="modal-field">
+                <label>עובד אחראי</label>
+                <select id="editWorker"></select>
+            </div>
+            <div class="modal-field">
                 <label>תאריך יעד</label>
                 <input type="date" id="editDueDate" />
             </div>
@@ -618,10 +675,12 @@
         // State
         let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
         let categories = JSON.parse(localStorage.getItem('categories') || '["עבודה","אישי","קניות","לימודים"]');
+        let workers = JSON.parse(localStorage.getItem('workers') || '[]');
 
         function save() {
             localStorage.setItem('tasks', JSON.stringify(tasks));
             localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('workers', JSON.stringify(workers));
         }
 
         function generateId() {
@@ -654,6 +713,28 @@
             input.value = '';
         }
 
+        // Workers
+        function renderWorkers() {
+            const options = '<option value="">ללא עובד אחראי</option>' +
+                workers.map(w => `<option value="${escapeHtml(w)}">${escapeHtml(w)}</option>`).join('');
+            document.getElementById('taskWorker').innerHTML = options;
+            document.getElementById('editWorker').innerHTML = options;
+        }
+
+        function addWorker() {
+            const input = document.getElementById('newWorker');
+            const name = input.value.trim();
+            if (!name) return;
+            if (workers.includes(name)) {
+                alert('עובד זה כבר קיים');
+                return;
+            }
+            workers.push(name);
+            save();
+            renderWorkers();
+            input.value = '';
+        }
+
         // Tasks
         function addTask() {
             const titleEl = document.getElementById('taskTitle');
@@ -665,6 +746,7 @@
                 title: title,
                 category: document.getElementById('taskCategory').value,
                 priority: document.getElementById('taskPriority').value,
+                worker: document.getElementById('taskWorker').value,
                 dueDate: document.getElementById('taskDueDate').value,
                 completed: false,
                 createdAt: new Date().toISOString()
@@ -704,6 +786,7 @@
             document.getElementById('editTitle').value = task.title;
             document.getElementById('editCategory').value = task.category;
             document.getElementById('editPriority').value = task.priority;
+            document.getElementById('editWorker').value = task.worker || '';
             document.getElementById('editDueDate').value = task.dueDate;
             document.getElementById('editModal').classList.add('active');
         }
@@ -719,6 +802,7 @@
             task.title = document.getElementById('editTitle').value.trim();
             task.category = document.getElementById('editCategory').value;
             task.priority = document.getElementById('editPriority').value;
+            task.worker = document.getElementById('editWorker').value;
             task.dueDate = document.getElementById('editDueDate').value;
             save();
             closeModal();
@@ -804,6 +888,7 @@
                         <div class="task-meta">
                             ${t.category ? `<span class="task-badge badge-category">${escapeHtml(t.category)}</span>` : ''}
                             <span class="task-badge badge-priority-${t.priority}">${priorityLabels[t.priority]}</span>
+                            ${t.worker ? `<span class="task-badge badge-worker">&#x1F464; ${escapeHtml(t.worker)}</span>` : ''}
                             ${t.dueDate ? `<span class="task-due ${overdue ? 'overdue' : ''}">${overdue ? '⚠ ' : ''}${formatDate(t.dueDate)}</span>` : ''}
                         </div>
                     </div>
@@ -837,7 +922,7 @@
 
         // Export/Import
         function exportTasks() {
-            const data = JSON.stringify({ tasks: tasks, categories: categories }, null, 2);
+            const data = JSON.stringify({ tasks: tasks, categories: categories, workers: workers }, null, 2);
             const blob = new Blob([data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -858,11 +943,18 @@
                         alert('הקובץ לא תקין - לא נמצאו משימות');
                         return;
                     }
-                    if (confirm('לייבא ' + data.tasks.length + ' משימות? (המשימות הקיימות יוחלפו)')) {
+                    const workerCount = Array.isArray(data.workers) ? data.workers.length : 0;
+                    const catCount = Array.isArray(data.categories) ? data.categories.length : 0;
+                    if (confirm(
+                        'לייבא ' + data.tasks.length + ' משימות, ' +
+                        catCount + ' קטגוריות ו-' + workerCount + ' עובדים?\n(הנתונים הקיימים יוחלפו)'
+                    )) {
                         tasks = data.tasks;
                         if (Array.isArray(data.categories)) categories = data.categories;
+                        if (Array.isArray(data.workers)) workers = data.workers;
                         save();
                         renderCategories();
+                        renderWorkers();
                         renderTasks();
                     }
                 } catch (err) {
@@ -875,6 +967,7 @@
 
         // Init
         renderCategories();
+        renderWorkers();
         renderTasks();
     </script>
 </body>
