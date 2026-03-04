@@ -973,8 +973,8 @@
             const tagList = document.getElementById('categoryTagList');
             if (tagList) {
                 tagList.innerHTML = categories.map(c =>
-                    `<span class="tag-item">
-                        <button class="tag-delete" onclick="deleteCategory(${JSON.stringify(c)})" title="מחק קטגוריה">&#x2715;</button>
+                    `<span class="tag-item" data-name="${escapeHtml(c)}">
+                        <button class="tag-delete" onclick="deleteCategory(this.parentElement.dataset.name)" title="מחק קטגוריה">&#x2715;</button>
                         ${escapeHtml(c)}
                     </span>`
                 ).join('');
@@ -1016,8 +1016,8 @@
                 tagList.innerHTML = workers.length === 0
                     ? '<span style="color:#bbb;font-size:0.85rem">אין עובדים עדיין</span>'
                     : workers.map(w =>
-                        `<span class="tag-item worker-tag">
-                            <button class="tag-delete" onclick="deleteWorker(${JSON.stringify(w)})" title="מחק עובד">&#x2715;</button>
+                        `<span class="tag-item worker-tag" data-name="${escapeHtml(w)}">
+                            <button class="tag-delete" onclick="deleteWorker(this.parentElement.dataset.name)" title="מחק עובד">&#x2715;</button>
                             ${escapeHtml(w)}
                         </span>`
                     ).join('');
