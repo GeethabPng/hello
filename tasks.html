@@ -183,7 +183,7 @@
             display: flex;
             gap: 8px;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             flex-wrap: wrap;
         }
 
@@ -215,6 +215,42 @@
 
         .btn-small:hover {
             background: #d2b4de;
+        }
+
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .category-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #e8daef;
+            color: #533483;
+            border-radius: 16px;
+            padding: 4px 10px;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
+
+        .category-tag-delete {
+            background: none;
+            border: none;
+            color: #533483;
+            cursor: pointer;
+            font-size: 0.9rem;
+            line-height: 1;
+            padding: 0 0 0 2px;
+            font-weight: 700;
+            opacity: 0.6;
+            transition: opacity 0.15s;
+        }
+
+        .category-tag-delete:hover {
+            opacity: 1;
         }
 
         /* Task List */
@@ -558,6 +594,7 @@
             <input type="text" id="newCategory" placeholder="קטגוריה חדשה..." />
             <button class="btn-small" onclick="addCategory()">הוסף קטגוריה</button>
         </div>
+        <div class="category-tags" id="categoryTags"></div>
 
         <!-- Toolbar -->
         <div class="toolbar">
@@ -631,13 +668,20 @@
         // Categories
         function renderCategories() {
             const options = '<option value="">ללא קטגוריה</option>' +
-                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+                categories.map(c => `<option value="${c}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('taskCategory').innerHTML = options;
             document.getElementById('editCategory').innerHTML = options;
 
             const filterOptions = '<option value="">כל הקטגוריות</option>' +
-                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+                categories.map(c => `<option value="${c}">${escapeHtml(c)}</option>`).join('');
             document.getElementById('filterCategory').innerHTML = filterOptions;
+
+            const tagsContainer = document.getElementById('categoryTags');
+            tagsContainer.innerHTML = categories.map(c => `
+                <span class="category-tag">
+                    ${escapeHtml(c)}
+                    <button class="category-tag-delete" onclick="deleteCategory('${escapeHtml(c).replace(/'/g, "\\'")}')" title="מחק קטגוריה">&#x2715;</button>
+                </span>`).join('');
         }
 
         function addCategory() {
@@ -652,6 +696,17 @@
             save();
             renderCategories();
             input.value = '';
+        }
+
+        function deleteCategory(name) {
+            const index = categories.indexOf(name);
+            if (index === -1) return;
+            categories.splice(index, 1);
+            // Remove category from tasks that used it
+            tasks.forEach(t => { if (t.category === name) t.category = ''; });
+            save();
+            renderCategories();
+            renderTasks();
         }
 
         // Tasks
@@ -691,7 +746,6 @@
         }
 
         function deleteTask(id) {
-            if (!confirm('למחוק את המשימה?')) return;
             tasks = tasks.filter(t => t.id !== id);
             save();
             renderTasks();
