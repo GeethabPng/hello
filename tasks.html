@@ -178,24 +178,40 @@
             cursor: pointer;
         }
 
-        /* Category Management */
-        .category-manager {
+        /* Management Sections */
+        .management-section {
+            background: white;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .management-header {
             display: flex;
-            gap: 8px;
             align-items: center;
-            margin-bottom: 15px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
-        .category-manager input {
+        .management-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #16213e;
+            white-space: nowrap;
+        }
+
+        .management-input {
             padding: 7px 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 0.85rem;
             font-family: inherit;
+            flex: 1;
+            min-width: 140px;
         }
 
-        .category-manager input:focus {
+        .management-input:focus {
             outline: none;
             border-color: #533483;
         }
@@ -211,10 +227,53 @@
             cursor: pointer;
             font-weight: 600;
             transition: background 0.2s;
+            white-space: nowrap;
         }
 
         .btn-small:hover {
             background: #d2b4de;
+        }
+
+        /* Tags */
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #e8daef;
+            color: #533483;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .tag.worker-tag {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .tag-del {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.6;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .tag-del:hover {
+            opacity: 1;
         }
 
         /* Task List */
@@ -222,6 +281,31 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+
+        .group-header {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #533483;
+            padding: 10px 6px 6px;
+            border-bottom: 2px solid #e8daef;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .group-header:first-child {
+            margin-top: 0;
+        }
+
+        .group-count {
+            font-size: 0.75rem;
+            background: #e8daef;
+            color: #533483;
+            border-radius: 10px;
+            padding: 1px 7px;
+            font-weight: 600;
         }
 
         .task-item {
@@ -270,7 +354,7 @@
 
         .task-meta {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
             align-items: center;
         }
@@ -285,6 +369,11 @@
         .badge-category {
             background: #e8f4fd;
             color: #1976d2;
+        }
+
+        .badge-worker {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
         .badge-priority-high {
@@ -445,7 +534,7 @@
         .data-bar {
             display: flex;
             gap: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
             justify-content: center;
         }
@@ -537,6 +626,9 @@
                 <select id="taskCategory">
                     <option value="">ללא קטגוריה</option>
                 </select>
+                <select id="taskWorker">
+                    <option value="">ללא עובד</option>
+                </select>
                 <select id="taskPriority">
                     <option value="low">עדיפות נמוכה</option>
                     <option value="medium">עדיפות בינונית</option>
@@ -554,9 +646,23 @@
         </div>
 
         <!-- Category Manager -->
-        <div class="category-manager">
-            <input type="text" id="newCategory" placeholder="קטגוריה חדשה..." />
-            <button class="btn-small" onclick="addCategory()">הוסף קטגוריה</button>
+        <div class="management-section">
+            <div class="management-header">
+                <span class="management-label">&#x1F4C1; קטגוריות</span>
+                <input type="text" class="management-input" id="newCategory" placeholder="קטגוריה חדשה..." />
+                <button class="btn-small" onclick="addCategory()">הוסף</button>
+            </div>
+            <div class="tag-list" id="categoryTags"></div>
+        </div>
+
+        <!-- Worker Manager -->
+        <div class="management-section">
+            <div class="management-header">
+                <span class="management-label">&#x1F464; עובדים</span>
+                <input type="text" class="management-input" id="newWorker" placeholder="שם עובד חדש..." />
+                <button class="btn-small" onclick="addWorker()">הוסף</button>
+            </div>
+            <div class="tag-list" id="workerTags"></div>
         </div>
 
         <!-- Toolbar -->
@@ -565,16 +671,26 @@
             <select id="filterCategory" onchange="renderTasks()">
                 <option value="">כל הקטגוריות</option>
             </select>
+            <select id="filterWorker" onchange="renderTasks()">
+                <option value="">כל העובדים</option>
+            </select>
             <select id="filterStatus" onchange="renderTasks()">
                 <option value="">הכל</option>
                 <option value="active">פעילות</option>
                 <option value="completed">הושלמו</option>
             </select>
+            <select id="groupBy" onchange="renderTasks()">
+                <option value="">ללא קיבוץ</option>
+                <option value="worker">קבץ לפי עובד</option>
+                <option value="category">קבץ לפי קטגוריה</option>
+            </select>
             <select id="sortBy" onchange="renderTasks()">
-                <option value="created">לפי תאריך יצירה</option>
-                <option value="dueDate">לפי תאריך יעד</option>
-                <option value="priority">לפי עדיפות</option>
-                <option value="alpha">לפי א-ב</option>
+                <option value="created">מיין: תאריך יצירה</option>
+                <option value="dueDate">מיין: תאריך יעד</option>
+                <option value="priority">מיין: עדיפות</option>
+                <option value="category">מיין: קטגוריה</option>
+                <option value="worker">מיין: עובד</option>
+                <option value="alpha">מיין: א-ב</option>
             </select>
         </div>
 
@@ -594,6 +710,10 @@
             <div class="modal-field">
                 <label>קטגוריה</label>
                 <select id="editCategory"></select>
+            </div>
+            <div class="modal-field">
+                <label>עובד</label>
+                <select id="editWorker"></select>
             </div>
             <div class="modal-field">
                 <label>עדיפות</label>
@@ -618,43 +738,105 @@
         // State
         let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
         let categories = JSON.parse(localStorage.getItem('categories') || '["עבודה","אישי","קניות","לימודים"]');
+        let workers = JSON.parse(localStorage.getItem('workers') || '[]');
 
         function save() {
             localStorage.setItem('tasks', JSON.stringify(tasks));
             localStorage.setItem('categories', JSON.stringify(categories));
+            localStorage.setItem('workers', JSON.stringify(workers));
         }
 
         function generateId() {
             return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
         }
 
-        // Categories
+        // ── Categories ──────────────────────────────────────────────────────
         function renderCategories() {
-            const options = '<option value="">ללא קטגוריה</option>' +
+            const opts = '<option value="">ללא קטגוריה</option>' +
                 categories.map(c => `<option value="${c}">${c}</option>`).join('');
-            document.getElementById('taskCategory').innerHTML = options;
-            document.getElementById('editCategory').innerHTML = options;
+            document.getElementById('taskCategory').innerHTML = opts;
+            document.getElementById('editCategory').innerHTML = opts;
 
-            const filterOptions = '<option value="">כל הקטגוריות</option>' +
+            const filterOpts = '<option value="">כל הקטגוריות</option>' +
                 categories.map(c => `<option value="${c}">${c}</option>`).join('');
-            document.getElementById('filterCategory').innerHTML = filterOptions;
+            document.getElementById('filterCategory').innerHTML = filterOpts;
+
+            const tagsEl = document.getElementById('categoryTags');
+            if (categories.length === 0) {
+                tagsEl.innerHTML = '<span style="font-size:0.8rem;color:#aaa">אין קטגוריות</span>';
+                return;
+            }
+            tagsEl.innerHTML = categories.map(c => `
+                <span class="tag">
+                    ${escapeHtml(c)}
+                    <button class="tag-del" onclick="deleteCategory('${escapeHtml(c)}')" title="מחק קטגוריה">&#x2715;</button>
+                </span>`).join('');
         }
 
         function addCategory() {
             const input = document.getElementById('newCategory');
             const name = input.value.trim();
             if (!name) return;
-            if (categories.includes(name)) {
-                alert('קטגוריה זו כבר קיימת');
-                return;
-            }
+            if (categories.includes(name)) { alert('קטגוריה זו כבר קיימת'); return; }
             categories.push(name);
             save();
             renderCategories();
             input.value = '';
         }
 
-        // Tasks
+        function deleteCategory(name) {
+            if (!confirm(`למחוק את הקטגוריה "${name}"?\nמשימות עם קטגוריה זו יישארו ללא קטגוריה.`)) return;
+            categories = categories.filter(c => c !== name);
+            tasks.forEach(t => { if (t.category === name) t.category = ''; });
+            save();
+            renderCategories();
+            renderTasks();
+        }
+
+        // ── Workers ─────────────────────────────────────────────────────────
+        function renderWorkers() {
+            const opts = '<option value="">ללא עובד</option>' +
+                workers.map(w => `<option value="${w}">${w}</option>`).join('');
+            document.getElementById('taskWorker').innerHTML = opts;
+            document.getElementById('editWorker').innerHTML = opts;
+
+            const filterOpts = '<option value="">כל העובדים</option>' +
+                workers.map(w => `<option value="${w}">${w}</option>`).join('');
+            document.getElementById('filterWorker').innerHTML = filterOpts;
+
+            const tagsEl = document.getElementById('workerTags');
+            if (workers.length === 0) {
+                tagsEl.innerHTML = '<span style="font-size:0.8rem;color:#aaa">אין עובדים</span>';
+                return;
+            }
+            tagsEl.innerHTML = workers.map(w => `
+                <span class="tag worker-tag">
+                    ${escapeHtml(w)}
+                    <button class="tag-del" onclick="deleteWorker('${escapeHtml(w)}')" title="מחק עובד">&#x2715;</button>
+                </span>`).join('');
+        }
+
+        function addWorker() {
+            const input = document.getElementById('newWorker');
+            const name = input.value.trim();
+            if (!name) return;
+            if (workers.includes(name)) { alert('עובד זה כבר קיים'); return; }
+            workers.push(name);
+            save();
+            renderWorkers();
+            input.value = '';
+        }
+
+        function deleteWorker(name) {
+            if (!confirm(`למחוק את העובד "${name}"?\nמשימות שהוקצו לעובד זה יישארו ללא עובד.`)) return;
+            workers = workers.filter(w => w !== name);
+            tasks.forEach(t => { if (t.worker === name) t.worker = ''; });
+            save();
+            renderWorkers();
+            renderTasks();
+        }
+
+        // ── Tasks ────────────────────────────────────────────────────────────
         function addTask() {
             const titleEl = document.getElementById('taskTitle');
             const title = titleEl.value.trim();
@@ -664,6 +846,7 @@
                 id: generateId(),
                 title: title,
                 category: document.getElementById('taskCategory').value,
+                worker: document.getElementById('taskWorker').value,
                 priority: document.getElementById('taskPriority').value,
                 dueDate: document.getElementById('taskDueDate').value,
                 completed: false,
@@ -680,6 +863,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('taskTitle').addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') addTask();
+            });
+            document.getElementById('newCategory').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') addCategory();
+            });
+            document.getElementById('newWorker').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') addWorker();
             });
         });
 
@@ -702,7 +891,8 @@
             if (!task) return;
             document.getElementById('editId').value = id;
             document.getElementById('editTitle').value = task.title;
-            document.getElementById('editCategory').value = task.category;
+            document.getElementById('editCategory').value = task.category || '';
+            document.getElementById('editWorker').value = task.worker || '';
             document.getElementById('editPriority').value = task.priority;
             document.getElementById('editDueDate').value = task.dueDate;
             document.getElementById('editModal').classList.add('active');
@@ -718,6 +908,7 @@
             if (!task) return;
             task.title = document.getElementById('editTitle').value.trim();
             task.category = document.getElementById('editCategory').value;
+            task.worker = document.getElementById('editWorker').value;
             task.priority = document.getElementById('editPriority').value;
             task.dueDate = document.getElementById('editDueDate').value;
             save();
@@ -725,11 +916,11 @@
             renderTasks();
         }
 
-        // Close modal on overlay click
         document.getElementById('editModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
 
+        // ── Render ────────────────────────────────────────────────────────────
         function isOverdue(task) {
             if (!task.dueDate || task.completed) return false;
             return new Date(task.dueDate) < new Date(new Date().toDateString());
@@ -741,28 +932,12 @@
 
         function formatDate(dateStr) {
             if (!dateStr) return '';
-            const d = new Date(dateStr);
-            return d.toLocaleDateString('he-IL');
+            return new Date(dateStr).toLocaleDateString('he-IL');
         }
 
-        function renderTasks() {
-            const search = document.getElementById('searchBox').value.trim().toLowerCase();
-            const filterCat = document.getElementById('filterCategory').value;
-            const filterStatus = document.getElementById('filterStatus').value;
-            const sortBy = document.getElementById('sortBy').value;
-
-            let filtered = tasks.filter(t => {
-                if (search && !t.title.toLowerCase().includes(search)) return false;
-                if (filterCat && t.category !== filterCat) return false;
-                if (filterStatus === 'active' && t.completed) return false;
-                if (filterStatus === 'completed' && !t.completed) return false;
-                return true;
-            });
-
-            filtered.sort((a, b) => {
-                // Completed tasks always at the bottom
+        function sortTasks(arr, sortBy) {
+            return [...arr].sort((a, b) => {
                 if (a.completed !== b.completed) return a.completed ? 1 : -1;
-
                 switch (sortBy) {
                     case 'priority':
                         return priorityValue(b.priority) - priorityValue(a.priority);
@@ -771,11 +946,57 @@
                         if (!a.dueDate) return 1;
                         if (!b.dueDate) return -1;
                         return new Date(a.dueDate) - new Date(b.dueDate);
+                    case 'category':
+                        return (a.category || '').localeCompare(b.category || '', 'he');
+                    case 'worker':
+                        return (a.worker || '').localeCompare(b.worker || '', 'he');
                     case 'alpha':
                         return a.title.localeCompare(b.title, 'he');
                     default: // created
                         return new Date(b.createdAt) - new Date(a.createdAt);
                 }
+            });
+        }
+
+        function taskCardHtml(t) {
+            const overdue = isOverdue(t);
+            const priorityLabels = { high: 'גבוהה', medium: 'בינונית', low: 'נמוכה' };
+            return `
+            <div class="task-item ${t.completed ? 'completed' : ''}">
+                <input type="checkbox" class="task-checkbox"
+                    ${t.completed ? 'checked' : ''}
+                    onchange="toggleTask('${t.id}')" />
+                <div class="task-content">
+                    <div class="task-title">${escapeHtml(t.title)}</div>
+                    <div class="task-meta">
+                        ${t.category ? `<span class="task-badge badge-category">${escapeHtml(t.category)}</span>` : ''}
+                        ${t.worker ? `<span class="task-badge badge-worker">&#x1F464; ${escapeHtml(t.worker)}</span>` : ''}
+                        <span class="task-badge badge-priority-${t.priority}">${priorityLabels[t.priority]}</span>
+                        ${t.dueDate ? `<span class="task-due ${overdue ? 'overdue' : ''}">${overdue ? '⚠ ' : ''}${formatDate(t.dueDate)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <button class="btn-icon btn-edit" onclick="openEdit('${t.id}')" title="ערוך">&#x270F;&#xFE0F;</button>
+                    <button class="btn-icon btn-delete" onclick="deleteTask('${t.id}')" title="מחק">&#x1F5D1;&#xFE0F;</button>
+                </div>
+            </div>`;
+        }
+
+        function renderTasks() {
+            const search = document.getElementById('searchBox').value.trim().toLowerCase();
+            const filterCat = document.getElementById('filterCategory').value;
+            const filterWorkerVal = document.getElementById('filterWorker').value;
+            const filterStatus = document.getElementById('filterStatus').value;
+            const groupBy = document.getElementById('groupBy').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            let filtered = tasks.filter(t => {
+                if (search && !t.title.toLowerCase().includes(search)) return false;
+                if (filterCat && t.category !== filterCat) return false;
+                if (filterWorkerVal && t.worker !== filterWorkerVal) return false;
+                if (filterStatus === 'active' && t.completed) return false;
+                if (filterStatus === 'completed' && !t.completed) return false;
+                return true;
             });
 
             const container = document.getElementById('taskList');
@@ -790,29 +1011,36 @@
                 return;
             }
 
-            const priorityLabels = { high: 'גבוהה', medium: 'בינונית', low: 'נמוכה' };
+            if (groupBy) {
+                // Build groups
+                const groupMap = new Map();
+                filtered.forEach(t => {
+                    const key = (groupBy === 'worker' ? t.worker : t.category) || '';
+                    const label = key || (groupBy === 'worker' ? 'ללא עובד' : 'ללא קטגוריה');
+                    if (!groupMap.has(label)) groupMap.set(label, []);
+                    groupMap.get(label).push(t);
+                });
 
-            container.innerHTML = filtered.map(t => {
-                const overdue = isOverdue(t);
-                return `
-                <div class="task-item ${t.completed ? 'completed' : ''}">
-                    <input type="checkbox" class="task-checkbox"
-                        ${t.completed ? 'checked' : ''}
-                        onchange="toggleTask('${t.id}')" />
-                    <div class="task-content">
-                        <div class="task-title">${escapeHtml(t.title)}</div>
-                        <div class="task-meta">
-                            ${t.category ? `<span class="task-badge badge-category">${escapeHtml(t.category)}</span>` : ''}
-                            <span class="task-badge badge-priority-${t.priority}">${priorityLabels[t.priority]}</span>
-                            ${t.dueDate ? `<span class="task-due ${overdue ? 'overdue' : ''}">${overdue ? '⚠ ' : ''}${formatDate(t.dueDate)}</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="task-actions">
-                        <button class="btn-icon btn-edit" onclick="openEdit('${t.id}')" title="ערוך">&#x270F;&#xFE0F;</button>
-                        <button class="btn-icon btn-delete" onclick="deleteTask('${t.id}')" title="מחק">&#x1F5D1;&#xFE0F;</button>
-                    </div>
-                </div>`;
-            }).join('');
+                // Sort group keys alphabetically (empty label last)
+                const sortedKeys = [...groupMap.keys()].sort((a, b) => {
+                    const aEmpty = a === 'ללא עובד' || a === 'ללא קטגוריה';
+                    const bEmpty = b === 'ללא עובד' || b === 'ללא קטגוריה';
+                    if (aEmpty && !bEmpty) return 1;
+                    if (!aEmpty && bEmpty) return -1;
+                    return a.localeCompare(b, 'he');
+                });
+
+                const icon = groupBy === 'worker' ? '&#x1F464;' : '&#x1F4C1;';
+                let html = '';
+                sortedKeys.forEach(key => {
+                    const group = sortTasks(groupMap.get(key), sortBy);
+                    html += `<div class="group-header">${icon} ${escapeHtml(key)} <span class="group-count">${group.length}</span></div>`;
+                    html += group.map(taskCardHtml).join('');
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = sortTasks(filtered, sortBy).map(taskCardHtml).join('');
+            }
 
             updateStats();
         }
@@ -835,9 +1063,9 @@
             document.getElementById('statOverdue').textContent = overdue;
         }
 
-        // Export/Import
+        // ── Export/Import ────────────────────────────────────────────────────
         function exportTasks() {
-            const data = JSON.stringify({ tasks: tasks, categories: categories }, null, 2);
+            const data = JSON.stringify({ tasks, categories, workers }, null, 2);
             const blob = new Blob([data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -861,8 +1089,10 @@
                     if (confirm('לייבא ' + data.tasks.length + ' משימות? (המשימות הקיימות יוחלפו)')) {
                         tasks = data.tasks;
                         if (Array.isArray(data.categories)) categories = data.categories;
+                        if (Array.isArray(data.workers)) workers = data.workers;
                         save();
                         renderCategories();
+                        renderWorkers();
                         renderTasks();
                     }
                 } catch (err) {
@@ -873,8 +1103,9 @@
             event.target.value = '';
         }
 
-        // Init
+        // ── Init ─────────────────────────────────────────────────────────────
         renderCategories();
+        renderWorkers();
         renderTasks();
     </script>
 </body>
