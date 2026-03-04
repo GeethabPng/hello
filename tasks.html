@@ -35,6 +35,20 @@
             margin-bottom: 5px;
         }
 
+        header h1[contenteditable="true"] {
+            outline: 2px dashed #533483;
+            border-radius: 6px;
+            padding: 2px 8px;
+            cursor: text;
+        }
+
+        .edit-title-hint {
+            font-size: 0.75rem;
+            color: #aaa;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
         header p {
             color: #666;
             font-size: 0.95rem;
@@ -502,8 +516,9 @@
 <body>
     <div class="app-container">
         <header>
-            <h1>&#x2705; מנהל משימות</h1>
+            <h1 id="pageTitle" title="לחץ לעריכת הכותרת">&#x2705; מנהל משימות</h1>
             <p>ארגן את המשימות שלך בקלות</p>
+            <div class="edit-title-hint" onclick="startEditTitle()">✏️ לחץ על הכותרת לעריכה</div>
         </header>
 
         <!-- Stats -->
@@ -615,6 +630,52 @@
     </div>
 
     <script>
+        // Page title
+        const savedTitle = localStorage.getItem('pageTitle');
+        if (savedTitle) {
+            document.getElementById('pageTitle').textContent = savedTitle;
+            document.title = savedTitle;
+        }
+
+        function startEditTitle() {
+            const h1 = document.getElementById('pageTitle');
+            h1.contentEditable = 'true';
+            h1.focus();
+            // place cursor at end
+            const range = document.createRange();
+            range.selectNodeContents(h1);
+            range.collapse(false);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const h1 = document.getElementById('pageTitle');
+
+            h1.addEventListener('click', startEditTitle);
+
+            h1.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    h1.blur();
+                }
+                if (e.key === 'Escape') {
+                    const stored = localStorage.getItem('pageTitle') || '✅ מנהל משימות';
+                    h1.textContent = stored;
+                    h1.blur();
+                }
+            });
+
+            h1.addEventListener('blur', function() {
+                h1.contentEditable = 'false';
+                const newTitle = h1.textContent.trim() || '✅ מנהל משימות';
+                h1.textContent = newTitle;
+                localStorage.setItem('pageTitle', newTitle);
+                document.title = newTitle;
+            });
+        });
+
         // State
         let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
         let categories = JSON.parse(localStorage.getItem('categories') || '["עבודה","אישי","קניות","לימודים"]');
